@@ -1,0 +1,180 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Survey Results</title>
+    <link rel="stylesheet" href="/static/css/style.css">
+    <link rel="stylesheet" href="/static/css/wordcloud.css">
+    <style>
+#chart-container {
+    width: 300px;
+    margin: 0 auto;
+}
+
+.bar-chart {
+    display: grid;
+    grid-template-columns: 100px 1fr;
+    gap: 5px;
+}
+
+.bar {
+    display: contents;
+}
+
+.bar-label {
+    text-align: right;
+    padding-right: 10px;
+    font-size: larger;
+}
+
+.bar-value {
+    background-color: #4CAF50;
+    height: 40px;
+    transition: width 0.5s ease-in-out;
+    border-radius: 5px;
+}
+    </style>
+</head>
+<body>
+    <h1>{{.Slide.Question}}</h1>
+    <div id="results-container">
+        {{if eq .Slide.ResultType "wordcloud"}}
+        <ul id="wordcloud" class="cloud" role="navigation" aria-label="Word cloud">
+            {{range $word, $weight := .WordCloudData}}
+            <li><a href="#" data-weight="{{$weight}}">{{$word}}</a></li>
+            {{end}}
+        </ul>
+        {{else if eq .Slide.ResultType "bar"}}
+        <div id="chart-container" class="bar-chart"></div>
+        {{end}}
+        <ul id="results-list" style="visibility: hidden;">
+            {{range $answer, $count := .Results}}
+                <li data-answer="{{$answer}}">{{$answer}}: <span class="count">{{$count}}</span></li>
+            {{end}}
+        </ul>
+    </div>
+
+    <div class="bottom-icons">
+        <div class="user-info">
+            <span class="user-icon">👤</span>
+            <span id="user-count">0</span>
+        </div>
+        <button id="emoji-button" class="emoji-button">🎉</button>
+    </div>
+
+    <script src="/static/js/app.js"></script>
+
+    <script>
+    window.appState = {
+        results: {},
+        userCount: 0,
+        subscribers: [],
+
+        setState: function(key, value) {
+            this[key] = value;
+            this.notifySubscribers(key, value);
+        },
+
+        subscribe: function(callback) {
+            this.subscribers.push(callback);
+        },
+
+        notifySubscribers: function(key, value) {
+            this.subscribers.forEach(callback => callback(key, value));
+        }
+    };
+
+    function updateWordCloud() {
+        const wordcloud = document.getElementById('wordcloud');
+        if (!wordcloud) return;
+
+        wordcloud.innerHTML = '';
+
+        const wordCloudData = window.appState.wordCloudData;
+
+        for (const [word, weight] of Object.entries(wordCloudData)) {
+            const li = document.createElement('li');
+            const a = document.createElement('a');
+            a.href = '#';
+            a.setAttribute('data-weight', weight);
+            a.textContent = word;
+            li.appendChild(a);
+            wordcloud.appendChild(li);
+        }
+    }
+
+    function calculateWordCloudData(results) {
+        const wordCloudData = {};
+        Object.entries(results).forEach(([answer, count]) => {
+            const words = answer.toLowerCase().split(/\s+/);
+            words.forEach(word => {
+                if (word.length > 0) {
+                    wordCloudData[word] = (wordCloudData[word] || 0) + count;
+                }
+            });
+        });
+        return wordCloudData;
+    }
+
+    function updateBarChart() {
+        const container = document.getElementById('chart-container');
+        if (!container) return;
+
+        container.innerHTML = '';
+        const results = window.appState.results;
+        const maxValue = Math.max(...Object.values(results));
+
+        Object.entries(results).forEach(([answer, count]) => {
+            const bar = document.createElement('div');
+            bar.className = 'bar';
+
+            const label = document.createElement('div');
+            label.className = 'bar-label';
+            label.textContent = answer;
+
+            const value = document.createElement('div');
+            value.className = 'bar-value';
+            const width = (count / maxValue) * 100;
+            value.style.width = `${width}%`;
+
+            bar.appendChild(label);
+            bar.appendChild(value);
+            container.appendChild(bar);
+        });
+    }
+
+    function getColor(index) {
+        const colors = ['#FF6384', '#36A2EB', '#FFCE56', '#4BC0C0', '#9966FF', '#FF9F40'];
+        return colors[index % colors.length];
+    }
+
+    window.appState.subscribe((key, value) => {
+        if (key === 'results') {
+            window.appState.wordCloudData = calculateWordCloudData(value);
+            updateWordCloud();
+            updateBarChart();
+        }
+    });
+
+    addEventListener("DOMContentLoaded", (event) => {
+        const resultsList = document.getElementById('results-list');
+        if (resultsList) {
+            const initialResults = {};
+            const listItems = resultsList.querySelectorAll('li');
+            listItems.forEach(li => {
+                const answer = li.getAttribute('data-answer');
+                const count = parseInt(li.querySelector('.count').textContent);
+                initialResults[answer] = count;
+            });
+
+            window.appState.results = initialResults;
+            window.appState.wordCloudData = calculateWordCloudData(initialResults);
+
+            updateWordCloud();
+            updateBarChart();
+        }
+    });
+    </script>
+</body>
+</html>

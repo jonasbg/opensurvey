@@ -1,0 +1,80 @@
+#wordcloud {
+  list-style: none;
+  padding-left: 0;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: center;
+  line-height: 2.75rem;
+  width: 100%;
+  max-width: 600px;
+  margin: 0 auto;
+}
+
+#wordcloud li {
+  padding: 0.125rem 0.25rem;
+}
+
+#wordcloud a {
+  --size: 4;
+  --color: #4caf50;
+  color: var(--color);
+  font-size: calc(var(--size) * 0.25rem + 0.5rem);
+  display: block;
+  position: relative;
+  text-decoration: none;
+  transition: transform 0.2s ease;
+}
+
+#wordcloud a[data-weight="1"] { --size: 1; }
+#wordcloud a[data-weight="2"] { --size: 2; }
+#wordcloud a[data-weight="3"] { --size: 3; }
+#wordcloud a[data-weight="4"] { --size: 4; }
+#wordcloud a[data-weight="5"] { --size: 6; }
+#wordcloud a[data-weight="6"] { --size: 8; }
+#wordcloud a[data-weight="7"] { --size: 10; }
+#wordcloud a[data-weight="8"] { --size: 13; }
+#wordcloud a[data-weight="9"] { --size: 16; }
+
+#wordcloud li:nth-child(2n+1) a { --color: #2e7d32; }
+#wordcloud li:nth-child(3n+1) a { --color: #1b5e20; }
+#wordcloud li:nth-child(4n+1) a { --color: #43a047; }
+
+#wordcloud a:hover {
+  transform: scale(1.1);
+}
+
+#wordcloud a::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: 50%;
+  width: 0;
+  height: 100%;
+  background: var(--color);
+  transform: translate(-50%, 0);
+  opacity: 0.15;
+  transition: width 0.25s;
+}
+
+#wordcloud a:focus::before,
+#wordcloud a:hover::before {
+  width: 100%;
+}
+
+@media (prefers-reduced-motion) {
+  #wordcloud * {
+      transition: none !important;
+  }
+}
+
+/* Responsive design for word cloud */
+@media (max-width: 600px) {
+  #wordcloud {
+      line-height: 2.25rem;
+  }
+
+  #wordcloud a {
+      font-size: calc(var(--size) * 0.2rem + 0.5rem);
+  }
+}

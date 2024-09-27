@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Survey Question</title>
+    <link rel="stylesheet" href="/static/css/style.css">
+</head>
+<body>
+    <h1>{{.Slide.Question}}</h1>
+    <form action="/submit/{{.Token}}" method="post">
+        {{if eq .Slide.Type "text"}}
+          <input type="text" name="answer" required>
+          <button type="submit">Submit</button>
+        {{else if eq .Slide.Type "radio"}}
+            {{range .Slide.Answers}}
+                <button type="submit" name="answer" value="{{.}}">{{.}}</button>
+            {{end}}
+        {{else if eq .Slide.Type "multiple"}}
+            <div class="checkbox-group">
+                {{range .Slide.Answers}}
+                    <div class="checkbox-option">
+                        <input type="checkbox" id="{{.}}" name="answers" value="{{.}}">
+                        <label for="{{.}}">{{.}}</label>
+                    </div>
+                {{end}}
+            </div>
+            <button type="submit">Submit</button>
+        {{end}}
+    </form>
+    <div class="bottom-icons">
+      <div class="user-info">
+          <span class="user-icon">👤</span>
+          <span id="user-count">0</span>
+      </div>
+    </div>
+    <script src="/static/js/app.js"></script>
+</body>
+</html>

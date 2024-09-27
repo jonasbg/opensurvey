@@ -1,0 +1,19 @@
+{{define "title"}}Waiting for Presenter{{end}}
+
+{{define "content"}}
+<h1>{{ .SurveyName }}</h1>
+<h2>Waiting for Presenter</h2>
+<p>Please wait for the presenter to start the survey.</p>
+
+<div id="status-message"></div>
+<!-- <button id="emoji-button">Send Random Emoji</button>
+<div id="emoji-buttons">
+    <button onclick="sendEmoji('👍')">👍</button>
+    <button onclick="sendEmoji('😀')">😀</button>
+    <button onclick="sendEmoji('🎉')">🎉</button>
+    <button onclick="sendEmoji('❤️')">❤️</button>
+    <button onclick="sendEmoji('🚀')">🚀</button>
+</div> -->
+{{end}}
+
+{{template "base.html" .}}

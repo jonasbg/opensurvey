@@ -1,0 +1,26 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{{template "title" .}}</title>
+    <script src="https://unpkg.com/htmx.org@1.9.10"></script>
+    <link rel="stylesheet" href="/static/css/style.css">
+</head>
+<body>
+
+    <main>
+        {{template "content" .}}
+    </main>
+
+    <div class="bottom-icons">
+      <div class="user-info">
+          <span class="user-icon">👤</span>
+          <span id="user-count">0</span>
+      </div>
+      <button id="emoji-button" class="emoji-button">🎉</button>
+    </div>
+
+    <script src="/static/js/app.js"></script>
+</body>
+</html>
