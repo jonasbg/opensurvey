@@ -28,7 +28,7 @@ func generateWords(count int) string {
 }
 
 func submitWords(token string, words string) error {
-	endpoint := fmt.Sprintf("http://localhost:8000/submit/%s", token)
+	endpoint := fmt.Sprintf("http://192.168.1.240:8000/submit/%s", token)
 	data := url.Values{}
 	data.Set("answer", words)
 
@@ -41,8 +41,8 @@ func submitWords(token string, words string) error {
 	req.Header.Set("Content-Type", "application/x-www-form-urlencoded")
 	req.Header.Set("User-Agent", "Mozilla/5.0 (iPhone; CPU iPhone OS 14_6 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/14.0.3 Mobile/15E148 Safari/604.1")
 	req.Header.Set("Accept", "text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/png,image/svg+xml,*/*;q=0.8")
-	req.Header.Set("Origin", "http://localhost:8000")
-	req.Header.Set("Referer", fmt.Sprintf("http://localhost:8000/survey/%s", token))
+	req.Header.Set("Origin", "http://192.168.1.240:8000")
+	req.Header.Set("Referer", fmt.Sprintf("http://192.168.1.240:8000/survey/%s", token))
 
 	resp, err := client.Do(req)
 	if err != nil {
