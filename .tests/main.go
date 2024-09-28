@@ -65,7 +65,7 @@ func main() {
 	token := "token" // Replace with the actual token
 	wordCount := 3   // Number of words to generate and submit
 
-	for i := 0; i < 15; i++ { // Submit 5 times
+	for i := 0; i < 25; i++ { // Submit 5 times
 		words := generateWords(wordCount)
 		fmt.Printf("Submitting words: %s\n", words)
 

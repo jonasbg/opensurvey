@@ -1,43 +1,5 @@
 {{define "wordcloud"}}
-<style>
-#wordcloud {
-    display: flex;
-    flex-wrap: wrap;
-    justify-content: center;
-    align-items: center;
-    height: 80vh;
-    margin: 0;
-    padding: 0;
-    list-style-type: none;
-}
-
-#wordcloud li {
-    margin: 5px;
-    transition: all 0.5s ease-out;
-}
-
-#wordcloud li a {
-    text-decoration: none;
-    color: #333;
-    transition: all 0.5s ease-out;
-}
-
-@keyframes fadeInScale {
-    0% { opacity: 0; transform: scale(0.8); }
-    100% { opacity: 1; transform: scale(1); }
-}
-
-@keyframes updatePulse {
-    0% { transform: scale(1); }
-    50% { transform: scale(1.1); text-shadow: 0 0 10px rgba(76, 175, 80, 0.7); }
-    100% { transform: scale(1); }
-}
-
-@keyframes fadeOutScale {
-    0% { opacity: 1; transform: scale(1); }
-    100% { opacity: 0; transform: scale(0.8); }
-}
-</style>
+<link rel="stylesheet" href="/static/css/wordcloud.css">
 
 <ul id="wordcloud" class="cloud" role="navigation" aria-label="Word cloud">
     {{range $word, $weight := .WordCloudData}}

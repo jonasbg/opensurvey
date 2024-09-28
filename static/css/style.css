@@ -5,6 +5,15 @@
   box-sizing: border-box;
 }
 
+:root {
+  --primary-color: #4caf50;
+  --primary-dark: #2e7d32;
+  --primary-darker: #1b5e20;
+  --primary-light: #81c784;
+  --background-color: #e8f5e9;
+  --text-color: #2e7d32;
+}
+
 html, body {
   height: 100%;
   overflow: hidden;
