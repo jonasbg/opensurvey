@@ -21,7 +21,7 @@
   .floating-emoji {
     position: fixed;
     font-size: 2em;
-    bottom: -20px;
+    bottom: -40px;
     z-index: 100;
     animation: floatUp linear, sway ease-in-out infinite;
     animation-fill-mode: forwards;
