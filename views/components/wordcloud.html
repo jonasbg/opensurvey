@@ -1,0 +1,65 @@
+{{define "wordcloud"}}
+<ul id="wordcloud" class="cloud" role="navigation" aria-label="Word cloud">
+    {{range $word, $weight := .WordCloudData}}
+    <li><a href="#" data-weight="{{$weight}}">{{$word}}</a></li>
+    {{end}}
+</ul>
+
+<script>
+function updateWordCloud() {
+    const wordcloud = document.getElementById('wordcloud');
+    if (!wordcloud) return;
+
+    wordcloud.innerHTML = '';
+
+    const wordCloudData = window.appState.wordCloudData;
+
+    for (const [word, weight] of Object.entries(wordCloudData)) {
+        const li = document.createElement('li');
+        const a = document.createElement('a');
+        a.href = '#';
+        a.setAttribute('data-weight', weight);
+        a.textContent = word;
+        li.appendChild(a);
+        wordcloud.appendChild(li);
+    }
+}
+
+function calculateWordCloudData(results) {
+    const wordCloudData = {};
+    Object.entries(results).forEach(([answer, count]) => {
+        const words = answer.toLowerCase().split(/\s+/);
+        words.forEach(word => {
+            if (word.length > 0) {
+                wordCloudData[word] = (wordCloudData[word] || 0) + count;
+            }
+        });
+    });
+    return wordCloudData;
+}
+
+addEventListener("DOMContentLoaded", (event) => {
+
+    window.appState.subscribe((key, value) => {
+        if (key === 'results') {
+            window.appState.wordCloudData = calculateWordCloudData(value);
+            updateWordCloud();
+        }
+    });
+
+    const resultsList = document.getElementById('results-list');
+    if (resultsList) {
+        const initialResults = {};
+        const listItems = resultsList.querySelectorAll('li');
+        listItems.forEach(li => {
+            const answer = li.getAttribute('data-answer');
+            const count = parseInt(li.querySelector('.count').textContent);
+            initialResults[answer] = count;
+        });
+
+        window.appState.wordCloudData = calculateWordCloudData(initialResults);
+        updateWordCloud();
+    }
+});
+</script>
+{{end}}

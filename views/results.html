@@ -70,11 +70,7 @@
     {{end}}
     <div id="results-container">
         {{if eq .Slide.ResultType "wordcloud"}}
-        <ul id="wordcloud" class="cloud" role="navigation" aria-label="Word cloud">
-            {{range $word, $weight := .WordCloudData}}
-            <li><a href="#" data-weight="{{$weight}}">{{$word}}</a></li>
-            {{end}}
-        </ul>
+            {{template "wordcloud" .}}
         {{else if eq .Slide.ResultType "bar"}}
         <div id="chart-container" class="bar-chart"></div>
         {{end}}
@@ -96,38 +92,6 @@
     <script src="/static/js/app.js"></script>
 
     <script>
-    function updateWordCloud() {
-        const wordcloud = document.getElementById('wordcloud');
-        if (!wordcloud) return;
-
-        wordcloud.innerHTML = '';
-
-        const wordCloudData = window.appState.wordCloudData;
-
-        for (const [word, weight] of Object.entries(wordCloudData)) {
-            const li = document.createElement('li');
-            const a = document.createElement('a');
-            a.href = '#';
-            a.setAttribute('data-weight', weight);
-            a.textContent = word;
-            li.appendChild(a);
-            wordcloud.appendChild(li);
-        }
-    }
-
-    function calculateWordCloudData(results) {
-        const wordCloudData = {};
-        Object.entries(results).forEach(([answer, count]) => {
-            const words = answer.toLowerCase().split(/\s+/);
-            words.forEach(word => {
-                if (word.length > 0) {
-                    wordCloudData[word] = (wordCloudData[word] || 0) + count;
-                }
-            });
-        });
-        return wordCloudData;
-    }
-
     function updateBarChart() {
         const container = document.getElementById('chart-container');
         if (!container) return;
@@ -179,8 +143,6 @@
 
     window.appState.subscribe((key, value) => {
         if (key === 'results') {
-            window.appState.wordCloudData = calculateWordCloudData(value);
-            updateWordCloud();
             updateBarChart();
         }
     });
@@ -198,9 +160,7 @@
             });
 
             window.appState.results = initialResults;
-            window.appState.wordCloudData = calculateWordCloudData(initialResults);
 
-            updateWordCloud();
             updateBarChart();
         }
     });

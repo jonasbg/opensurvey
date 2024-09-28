@@ -66,6 +66,7 @@ func main() {
 
 	t := template.Must(template.ParseGlob("views/*.html"))
 	template.Must(t.ParseGlob("views/_layout/*.html"))
+	template.Must(t.ParseGlob("views/components/*.html"))
 	e.Renderer = &TemplateRenderer{templates: t}
 
 	e.GET("/", handleIndex)
