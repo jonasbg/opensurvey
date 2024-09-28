@@ -16,7 +16,7 @@ import (
 )
 
 var (
-	addr               = flag.String("addr", "192.168.1.240:8000", "http service address")
+	addr               = flag.String("addr", "localhost:8000", "http service address")
 	maxConnections     = flag.Int("max", 1000, "maximum number of connections")
 	rampUpTime         = flag.Duration("ramp", 1*time.Minute, "time to ramp up to max connections")
 	testDuration       = flag.Duration("duration", 5*time.Minute, "total test duration")

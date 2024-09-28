@@ -4,7 +4,6 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>{{template "title" .}}</title>
-    <script src="https://unpkg.com/htmx.org@1.9.10"></script>
     <link rel="stylesheet" href="/static/css/base.css">
     <link rel="stylesheet" href="/static/css/emojis.css">
     <style>
@@ -36,7 +35,6 @@
             align-items: center;
             height: 100vh;
             margin: 0;
-            background-color: #f0f0f0;
         }
 
         .user-info {
@@ -60,10 +58,15 @@
             --frac: max((var(--temp) - var(--int)) * 100 - 0.5, 0);
             counter-reset: int var(--int) frac var(--frac);
         }
+        .user-icon{
+        line-height: normal !important;
+      }
+      .user-count{
+        height: 100% !important;
+        align-content: center !important;
+        font-size: 1.5em !important;
+      }
 
-        #user-count::before {
-            content: counter(int);
-        }
     </style>
 </head>
 <body>
@@ -73,10 +76,11 @@
     </main>
 
     <div class="bottom-icons">
-      <div class="user-info">
-          <span class="user-icon">👤</span>
-          <span id="user-count">0</span>
-      </div>
+        <div class="user-info">
+            <span class="user-icon">
+                <svg xmlns="http://www.w3.org/2000/svg" width="2em" height="2em" viewBox="0 0 20 20"><path fill="currentColor" d="M10 9a3 3 0 1 0 0-6a3 3 0 0 0 0 6M6 8a2 2 0 1 1-4 0a2 2 0 0 1 4 0m-4.51 7.326a.78.78 0 0 1-.358-.442a3 3 0 0 1 4.308-3.516a6.48 6.48 0 0 0-1.905 3.959q-.034.335.025.654a5 5 0 0 1-2.07-.655m14.95.654a5 5 0 0 0 2.07-.654a.78.78 0 0 0 .357-.442a3 3 0 0 0-4.308-3.517a6.48 6.48 0 0 1 1.907 3.96a2.3 2.3 0 0 1-.026.654M18 8a2 2 0 1 1-4 0a2 2 0 0 1 4 0M5.304 16.19a.84.84 0 0 1-.277-.71a5 5 0 0 1 9.947 0a.84.84 0 0 1-.277.71A6.98 6.98 0 0 1 10 18a6.97 6.97 0 0 1-4.696-1.81"/></svg>          </span>
+                <span id="user-count">0</span>
+        </div>
       <button id="emoji-button" class="emoji-button">🎉</button>
     </div>
 

@@ -11,18 +11,11 @@
 <body>
     <h1>Welcome to the Survey App</h1>
     <p>Enter your token to start the survey:</p>
-    <form id="survey-form">
-        <input type="text" id="token-input" required>
+    <form id="survey-form" method="POST" action="/">
+        <input type="text" name="token" id="token" required>
         <button type="submit">Start Survey</button>
     </form>
     <script src="/static/js/app.js"></script>
-    <script>
-        document.getElementById('survey-form').addEventListener('submit', function (e) {
-            e.preventDefault();
-            var token = document.getElementById('token-input').value;
-            window.location.href = '/survey/' + encodeURIComponent(token);
-        });
-    </script>
 </body>
 
 </html>

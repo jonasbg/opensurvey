@@ -51,7 +51,7 @@ var (
 )
 
 const (
-	userIDCookieName = "survey_user_id"
+	userIDCookieName = "opensurvey_cookie"
 	cookieMaxAge     = 2 * 60 * 60 // 2 hours in seconds
 )
 
@@ -70,12 +70,14 @@ func main() {
 	e.Renderer = &TemplateRenderer{templates: t}
 
 	e.GET("/", handleIndex)
+	e.POST("/", handleToken)
 	e.GET("/survey/:token", handleSurvey)
 	e.POST("/submit/:token", handleSubmit)
 	e.GET("/results/:token", handleResults)
 	e.GET("/completed/:token", handleCompleted)
+	e.GET("/presenter", handlePresenter)
 	e.GET("/ws", handleWebSocket)
-	e.POST("/nextSlide", handleNextSlide)
+	e.GET("/nextSlide", handleNextSlide)
 
 	go handleMessages()
 
@@ -141,6 +143,34 @@ func handleIndex(c echo.Context) error {
 	return c.Render(http.StatusOK, "index.html", nil)
 }
 
+func handleToken(c echo.Context) error {
+	token := c.FormValue("token")
+
+	if token == "" {
+		return c.String(http.StatusBadRequest, "Token is required")
+	}
+
+	if token == config.Secret {
+
+		// Create a new cookie with the token
+		cookie := new(http.Cookie)
+		cookie.Name = userIDCookieName
+		cookie.Value = token
+		cookie.HttpOnly = true                 // Makes the cookie inaccessible to JavaScript
+		cookie.Secure = c.Request().TLS != nil // Only send over HTTPS
+		cookie.SameSite = http.SameSiteStrictMode
+		cookie.Path = "/"
+
+		// Set the cookie
+		c.SetCookie(cookie)
+
+		// Redirect to the presenter page
+		return c.Redirect(http.StatusFound, "/presenter")
+	} else {
+		return c.Redirect(http.StatusFound, "/survey/"+token)
+	}
+}
+
 func handleCompleted(c echo.Context) error {
 	token := c.Param("token")
 	if token != config.Token {
@@ -161,6 +191,16 @@ func handleCompleted(c echo.Context) error {
 	clearUserIDCookie(c)
 
 	return c.Redirect(http.StatusSeeOther, "/survey/"+token)
+}
+
+func handlePresenter(c echo.Context) error {
+	// Retrieve the token from the cookie
+	cookie, err := c.Cookie(userIDCookieName)
+	if err != nil || cookie.Value != config.Secret {
+		return c.String(http.StatusUnauthorized, "Unauthorized")
+	}
+
+	return c.Render(http.StatusOK, "presenter.html", nil)
 }
 
 func handleSurvey(c echo.Context) error {
@@ -344,8 +384,20 @@ func handleWebSocket(c echo.Context) error {
 }
 
 func handleNextSlide(c echo.Context) error {
-	secret := c.FormValue("secret")
-	if secret != config.Secret {
+	// Check for authentication via cookie or header
+	authenticated := false
+
+	cookie, err := c.Cookie(userIDCookieName)
+	if err == nil || cookie.Value == config.Secret {
+		authenticated = true
+	}
+
+	secret := c.Request().Header.Get("x-token")
+	if secret == config.Secret {
+		authenticated = true
+	}
+
+	if !authenticated {
 		return c.JSON(http.StatusUnauthorized, map[string]string{"error": "Invalid secret"})
 	}
 
@@ -358,9 +410,14 @@ func handleNextSlide(c echo.Context) error {
 		broadcast <- Message{Type: "finished", Payload: true}
 		return c.NoContent(http.StatusSeeOther)
 	}
-
+	type SurveyResults map[string]int
+	emptyResults := make(SurveyResults)
 	broadcast <- Message{Type: "newSlide", Payload: currentSlide}
-	return c.NoContent(http.StatusOK)
+	return c.Render(http.StatusOK, "results.html", map[string]interface{}{
+		"Slide":       config.Survey[currentSlide],
+		"Results":     emptyResults,
+		"HasAnswered": false,
+	})
 }
 
 func handleMessages() {

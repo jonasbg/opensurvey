@@ -1,5 +1,6 @@
 @import url("/static/css/checkbox.css");
 @import url("/static/css/radio.css");
+@import url("/static/css/userCount.css");
 /* Reset and base styles */
 * {
   margin: 0;
@@ -89,10 +90,11 @@ form {
   align-items: center;
 }
 
-input[type="text"],
-input[type="radio"],
-select,
-button {
+
+form input[type="text"],
+form input[type="radio"],
+form select,
+form button {
   width: 100%;
   padding: 12px;
   margin-bottom: 15px;
@@ -115,6 +117,12 @@ button {
   font-weight: bold;
   cursor: pointer;
   transition: background-color 0.3s ease;
+  padding: 12px;
+  margin-bottom: 15px;
+  border: 2px solid #4caf50;
+  border-radius: 8px;
+  font-size: 1rem;
+  transition: all 0.3s ease;
 }
 
 button:hover {
