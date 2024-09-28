@@ -1,6 +1,8 @@
 @import url("/static/css/checkbox.css");
 @import url("/static/css/radio.css");
 @import url("/static/css/userCount.css");
+@import url("/static/css/emojis.css");
+@import url("/static/css/barChart.css");
 /* Reset and base styles */
 * {
   margin: 0;
@@ -221,11 +223,10 @@ input[type="radio"]:checked::before {
 .user-info {
   display: flex;
   align-items: center;
-  font-size: 1.2rem;
+  gap: 0.5em;
 }
-
-.user-icon {
-  margin-right: 5px;
+.user-count {
+  font-size: 1.2em;
 }
 
 .emoji-button {

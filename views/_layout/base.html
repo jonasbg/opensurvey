@@ -5,7 +5,6 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>{{template "title" .}}</title>
     <link rel="stylesheet" href="/static/css/base.css">
-    <link rel="stylesheet" href="/static/css/emojis.css">
     <style>
                 @property --count {
             syntax: "<number>";
@@ -37,19 +36,6 @@
             margin: 0;
         }
 
-        .user-info {
-            padding: 20px;
-            border-radius: 8px;
-            /* box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1); */
-            display: flex;
-            align-items: center;
-            font-size: 24px;
-        }
-
-        .user-icon {
-            margin-right: 10px;
-        }
-
         #user-count {
             font: 800 20px monospace;
             transition: --count 1s;
@@ -58,14 +44,6 @@
             --frac: max((var(--temp) - var(--int)) * 100 - 0.5, 0);
             counter-reset: int var(--int) frac var(--frac);
         }
-        .user-icon{
-        line-height: normal !important;
-      }
-      .user-count{
-        height: 100% !important;
-        align-content: center !important;
-        font-size: 1.5em !important;
-      }
 
     </style>
 </head>

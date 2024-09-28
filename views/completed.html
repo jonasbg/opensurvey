@@ -5,7 +5,6 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Survey Finished</title>
     <link rel="stylesheet" href="/static/css/base.css">
-    <link rel="stylesheet" href="/static/css/emojis.css">
 </head>
 <body>
     <h1>Survey Finished</h1>
@@ -21,7 +20,7 @@
     <script>
         document.addEventListener('DOMContentLoaded', function() {
             window.appState.enableEmojis = true;
-            
+
             // Add click event listeners to emoji buttons
             document.querySelectorAll('.emoji-btn').forEach(button => {
                 button.addEventListener('click', function() {
