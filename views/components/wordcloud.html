@@ -18,7 +18,7 @@ function updateWordCloud() {
 
     for (const [word, weight] of Object.entries(wordCloudData)) {
         const normalizedWeight = Math.log(weight + 1) / Math.log(maxWeight + 1);
-        const fontSize = 14 + normalizedWeight * 24;
+        const fontSize = 14 + normalizedWeight * 32;
 
         let li = wordcloud.querySelector(`li a[data-word="${word}"]`);
         if (li) {
