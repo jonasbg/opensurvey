@@ -4,28 +4,32 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Survey Finished</title>
-    <link rel="stylesheet" href="/static/css/style.css">
+    <link rel="stylesheet" href="/static/css/base.css">
+    <link rel="stylesheet" href="/static/css/emojis.css">
 </head>
 <body>
     <h1>Survey Finished</h1>
     <p>Thank you for participating in the survey!</p>
     <div id="emoji-buttons">
-        <button class="emoji-btn" onclick="sendEmoji('👍')">👍</button>
-        <button class="emoji-btn" onclick="sendEmoji('👏')">👏</button>
-        <button class="emoji-btn" onclick="sendEmoji('💯')">💯</button>
-        <button class="emoji-btn" onclick="sendEmoji('💩')">💩</button>
-        <button class="emoji-btn" onclick="sendEmoji('👎')">👎</button>
+        <button class="emoji-btn" data-emoji="👍">👍</button>
+        <button class="emoji-btn" data-emoji="👏">👏</button>
+        <button class="emoji-btn" data-emoji="💯">💯</button>
+        <button class="emoji-btn" data-emoji="💩">💩</button>
+        <button class="emoji-btn" data-emoji="👎">👎</button>
     </div>
     <script src="/static/js/app.js"></script>
     <script>
-window.document.onload = function(e){
-    window.appState.enableEmojis = true;
-}
-
-document.addEventListener('DOMContentLoaded', function() {
-  // This code runs when the basic structure of the page has loaded
-  window.appState.enableEmojis = true;
-});
-        </script>
+        document.addEventListener('DOMContentLoaded', function() {
+            window.appState.enableEmojis = true;
+            
+            // Add click event listeners to emoji buttons
+            document.querySelectorAll('.emoji-btn').forEach(button => {
+                button.addEventListener('click', function() {
+                    const emoji = this.getAttribute('data-emoji');
+                    window.sendEmoji(emoji);
+                });
+            });
+        });
+    </script>
 </body>
 </html>

@@ -4,11 +4,11 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>Survey Question</title>
-    <link rel="stylesheet" href="/static/css/style.css">
+    <link rel="stylesheet" href="/static/css/base.css">
 </head>
 <body>
     <h1>{{.Slide.Question}}</h1>
-    <form action="/submit/{{.Token}}" method="post">
+    <form action="/submit/{{.Token}}" method="post" class="survey">
         {{if eq .Slide.Type "text"}}
           <input type="text" name="answer" required>
           <button type="submit">Submit</button>

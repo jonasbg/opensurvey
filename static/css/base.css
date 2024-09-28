@@ -1,8 +1,14 @@
+@import url("/static/css/checkbox.css");
+@import url("/static/css/radio.css");
 /* Reset and base styles */
 * {
   margin: 0;
   padding: 0;
   box-sizing: border-box;
+  user-select: none;
+  -webkit-user-select: none;
+  -moz-user-select: none;
+  -ms-user-select: none;
 }
 
 :root {
@@ -12,32 +18,41 @@
   --primary-light: #81c784;
   --background-color: #e8f5e9;
   --text-color: #2e7d32;
+  --safe-area-inset-bottom: env(safe-area-inset-bottom, 0px);
 }
 
-html, body {
+html {
   height: 100%;
   overflow: hidden;
-  position: fixed;
-  width: 100%;
+}
+
+body {
+  height: 100%;
   font-family: 'Arial', sans-serif;
-  background-color: #e8f5e9; /* Light baby green background */
-  color: #2e7d32; /* Darker green for text */
-  min-height: 100vh;
+  background-color: var(--background-color);
+  color: var(--text-color);
   display: flex;
   flex-direction: column;
   justify-content: center;
   align-items: center;
   padding: 20px;
+  padding-bottom: calc(20px + var(--safe-area-inset-bottom));
   touch-action: none;
   -ms-touch-action: none;
+  position: relative;
+  overflow-y: auto;
+  -webkit-overflow-scrolling: touch;
 }
 
-/* Prevent text selection */
-* {
-  user-select: none;
-  -webkit-user-select: none;
-  -moz-user-select: none;
-  -ms-user-select: none;
+main {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  width: 100%;
+  max-width: 600px;
+  margin: auto;
 }
 
 /* Typography */
@@ -182,73 +197,17 @@ input[type="radio"]:checked::before {
   background-color: #81c784;
 }
 
-.checkbox-group {
-  width: 100%;
-  max-width: 400px;
-  margin-bottom: 20px;
-}
-
-.checkbox-option {
-  display: flex;
-  align-items: center;
-  margin-bottom: 10px;
-}
-
-.checkbox-option input[type="checkbox"] {
-  appearance: none;
-  -webkit-appearance: none;
-  width: 40px;
-  height: 40px;
-  border: 2px solid #4caf50;
-  border-radius: 4px;
-  margin-right: 10px;
-  display: grid;
-  place-content: center;
-  cursor: pointer;
-}
-
-.checkbox-option input[type="checkbox"]::before {
-  content: "";
-  width: 12px;
-  height: 12px;
-  transform: scale(0);
-  transition: 120ms transform ease-in-out;
-  box-shadow: inset 1em 1em #4caf50;
-  transform-origin: center;
-  clip-path: polygon(14% 44%, 0 65%, 50% 100%, 100% 16%, 80% 0%, 43% 62%);
-}
-
-.checkbox-option input[type="checkbox"]:checked::before {
-  transform: scale(1);
-}
-
-.checkbox-option label {
-  font-size: 1rem;
-  color: #2e7d32;
-  cursor: pointer;
-}
-
-.checkbox-option:hover input[type="checkbox"] {
-  background-color: #e8f5e9;
-}
-
 /* New styles for bottom icons */
 .bottom-icons {
   position: fixed;
-  bottom: 20px;
+  bottom: var(--safe-area-inset-bottom);
   left: 0;
   right: 0;
   display: flex;
   justify-content: space-between;
   align-items: center;
-  padding: 0 20px;
-
-  position: fixed;
-  bottom: 0;
-  display: flex;
-  justify-content: space-between;
-  width: 100%;
-  padding: 0 2em;
+  padding: 10px 20px;
+  z-index: 1;
 }
 
 .user-info {
@@ -272,6 +231,7 @@ input[type="radio"]:checked::before {
   cursor: pointer;
   transition: transform 0.2s ease, background-color 0.3s ease;
   display: flex;
+  margin-right: 1em !important;
   justify-content: center;
   align-items: center;
 }
@@ -281,10 +241,51 @@ input[type="radio"]:checked::before {
   background-color: #81c784;
 }
 
+input[type="text"] {
+  width: 100%;
+  max-width: 400px;
+  padding: 15px;
+  margin-bottom: 15px;
+  border: 2px solid var(--primary-color);
+  border-radius: 8px;
+  font-size: 18px;
+  /* Increased font size */
+  text-align: center;
+  /* Center the text */
+  transition: all 0.3s ease;
+}
+
+input[type="text"]:focus {
+  outline: none;
+  border-color: var(--primary-dark);
+  box-shadow: 0 0 0 2px rgba(76, 175, 80, 0.2);
+}
+
+/* Prevent zoom on iOS devices */
+@supports (-webkit-touch-callout: none) {
+
+  input[type="text"],
+  input[type="number"],
+  select,
+  textarea {
+      font-size: 16px;
+      /* Minimum font size to prevent zoom on iOS */
+  }
+}
+
+/* Responsive adjustments */
+@media (max-width: 600px) {
+  input[type="text"] {
+      font-size: 16px;
+      /* Ensure minimum font size on smaller screens */
+  }
+}
+
 /* Responsive design */
 @media (max-width: 600px) {
   body {
     padding: 10px;
+    padding-bottom: calc(10px + var(--safe-area-inset-bottom));
   }
 
   .checkbox-option {
@@ -354,5 +355,19 @@ input[type="radio"]:checked::before {
     font-size: 1.2rem;
     width: 40px;
     height: 40px;
+  }
+}
+
+/* iOS-specific adjustments */
+@supports (-webkit-touch-callout: none) {
+  body {
+    /* Fallback for older iOS versions */
+    padding-bottom: 70px;
+  }
+
+  .bottom-icons {
+    /* Fallback for older iOS versions */
+    bottom: 0;
+    padding-bottom: max(10px, var(--safe-area-inset-bottom));
   }
 }

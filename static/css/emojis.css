@@ -1,0 +1,28 @@
+@keyframes floatUp {
+    0% {
+      bottom: -50px;
+      opacity: 1;
+    }
+    100% {
+      bottom: 100vh;
+      opacity: 1;
+    }
+  }
+  
+  @keyframes sway {
+    0%, 100% {
+      transform: translateX(-25px);
+    }
+    50% {
+      transform: translateX(25px);
+    }
+  }
+  
+  .floating-emoji {
+    position: fixed;
+    font-size: 2em;
+    bottom: -20px;
+    z-index: 100;
+    animation: floatUp linear, sway ease-in-out infinite;
+    animation-fill-mode: forwards;
+  }

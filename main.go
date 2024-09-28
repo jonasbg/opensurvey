@@ -321,31 +321,25 @@ func handleWebSocket(c echo.Context) error {
 	if err != nil {
 		return err
 	}
-
 	newCount := atomic.AddInt32(&clientCount, 1)
-
 	clients.Store(ws, true)
 	broadcast <- Message{Type: "userCount", Payload: newCount}
-
 	defer func() {
 		clients.Delete(ws)
 		ws.Close()
 		newCount := atomic.AddInt32(&clientCount, -1)
 		broadcast <- Message{Type: "userCount", Payload: newCount}
 	}()
-
 	for {
 		var msg Message
 		err := ws.ReadJSON(&msg)
 		if err != nil {
 			break
 		}
-
-		if msg.Type == "emoji" {
+		if msg.Type == "emoji" || msg.Type == "emojiPopped" {
 			broadcast <- msg
 		}
 	}
-
 	return nil
 }
 

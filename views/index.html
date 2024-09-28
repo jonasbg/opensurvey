@@ -1,11 +1,13 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Survey App</title>
-    <link rel="stylesheet" href="/static/css/style.css">
+    <link rel="stylesheet" href="/static/css/base.css">
 </head>
+
 <body>
     <h1>Welcome to the Survey App</h1>
     <p>Enter your token to start the survey:</p>
@@ -15,11 +17,12 @@
     </form>
     <script src="/static/js/app.js"></script>
     <script>
-        document.getElementById('survey-form').addEventListener('submit', function(e) {
+        document.getElementById('survey-form').addEventListener('submit', function (e) {
             e.preventDefault();
             var token = document.getElementById('token-input').value;
             window.location.href = '/survey/' + encodeURIComponent(token);
         });
     </script>
 </body>
+
 </html>
