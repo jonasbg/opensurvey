@@ -8,7 +8,7 @@
     <link rel="stylesheet" href="/static/css/wordcloud.css">
     <style>
 #chart-container {
-    width: 300px;
+    width: 400px;
     margin: 0 auto;
 }
 
@@ -25,19 +25,49 @@
 .bar-label {
     text-align: right;
     padding-right: 10px;
-    font-size: larger;
+    font-size: 1.5em;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
 }
 
 .bar-value {
     background-color: #4CAF50;
     height: 40px;
-    transition: width 0.5s ease-in-out;
+    transition: width 0.5s ease-in-out, background-color 0.5s ease-in-out;
     border-radius: 5px;
 }
+
+@keyframes fadeIn {
+    from { opacity: 0; }
+    to { opacity: 1; }
+}
+
+@keyframes scaleIn {
+    from { transform: scale(0.9); }
+    to { transform: scale(1); }
+}
+
+#wordcloud li {
+    animation: fadeIn 0.5s ease-out, scaleIn 0.5s ease-out;
+}
+
+.bar-value.updated {
+    animation: pulse 0.5s ease-in-out;
+}
+
+@keyframes pulse {
+    0% { transform: scale(1); }
+    50% { transform: scale(1.05); }
+    100% { transform: scale(1); }
+}
+
     </style>
 </head>
 <body>
+    {{if ne .Slide.ResultType "wordcloud"}}
     <h1>{{.Slide.Question}}</h1>
+    {{end}}
     <div id="results-container">
         {{if eq .Slide.ResultType "wordcloud"}}
         <ul id="wordcloud" class="cloud" role="navigation" aria-label="Word cloud">
@@ -48,7 +78,7 @@
         {{else if eq .Slide.ResultType "bar"}}
         <div id="chart-container" class="bar-chart"></div>
         {{end}}
-        <ul id="results-list" style="visibility: hidden;">
+        <ul id="results-list" style="display: none;">
             {{range $answer, $count := .Results}}
                 <li data-answer="{{$answer}}">{{$answer}}: <span class="count">{{$count}}</span></li>
             {{end}}
@@ -66,25 +96,6 @@
     <script src="/static/js/app.js"></script>
 
     <script>
-    window.appState = {
-        results: {},
-        userCount: 0,
-        subscribers: [],
-
-        setState: function(key, value) {
-            this[key] = value;
-            this.notifySubscribers(key, value);
-        },
-
-        subscribe: function(callback) {
-            this.subscribers.push(callback);
-        },
-
-        notifySubscribers: function(key, value) {
-            this.subscribers.forEach(callback => callback(key, value));
-        }
-    };
-
     function updateWordCloud() {
         const wordcloud = document.getElementById('wordcloud');
         if (!wordcloud) return;
@@ -121,26 +132,43 @@
         const container = document.getElementById('chart-container');
         if (!container) return;
 
-        container.innerHTML = '';
         const results = window.appState.results;
         const maxValue = Math.max(...Object.values(results));
 
         Object.entries(results).forEach(([answer, count]) => {
-            const bar = document.createElement('div');
-            bar.className = 'bar';
-
-            const label = document.createElement('div');
-            label.className = 'bar-label';
-            label.textContent = answer;
-
-            const value = document.createElement('div');
-            value.className = 'bar-value';
+            let bar = container.querySelector(`.bar[data-answer="${answer}"]`);
             const width = (count / maxValue) * 100;
-            value.style.width = `${width}%`;
 
-            bar.appendChild(label);
-            bar.appendChild(value);
-            container.appendChild(bar);
+            if (bar) {
+                const value = bar.querySelector('.bar-value');
+                value.style.width = `${width}%`;
+                value.classList.add('updated');
+                setTimeout(() => value.classList.remove('updated'), 500);
+            } else {
+                bar = document.createElement('div');
+                bar.className = 'bar';
+                bar.setAttribute('data-answer', answer);
+
+                const label = document.createElement('div');
+                label.className = 'bar-label';
+                label.textContent = answer;
+
+                const value = document.createElement('div');
+                value.className = 'bar-value';
+                value.style.width = `${width}%`;
+
+                bar.appendChild(label);
+                bar.appendChild(value);
+                container.appendChild(bar);
+            }
+        });
+
+        // Remove bars for answers that no longer exist
+        container.querySelectorAll('.bar').forEach(bar => {
+            const answer = bar.getAttribute('data-answer');
+            if (!(answer in results)) {
+                bar.remove();
+            }
         });
     }
 
@@ -158,6 +186,7 @@
     });
 
     addEventListener("DOMContentLoaded", (event) => {
+        window.appState.enableEmojis = true;
         const resultsList = document.getElementById('results-list');
         if (resultsList) {
             const initialResults = {};

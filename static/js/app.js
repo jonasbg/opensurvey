@@ -7,6 +7,7 @@
     results: {},
     userCount: 0,
     subscribers: [],
+    enableEmojis: false,
 
     // Method to update state and notify subscribers
     setState: function(key, value) {
@@ -52,7 +53,9 @@
           } else if (message.type === "finished") {
               window.location.href = `/completed/${token}`;
           } else if (message.type === "emoji") {
-              createFloatingEmoji(message.payload);
+            if (window.appState.enableEmojis) {
+                createFloatingEmoji(message.payload);
+            }
           }
       };
 

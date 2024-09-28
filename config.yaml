@@ -2,6 +2,9 @@ name: "My survey"
 token: "token"
 secret: "presenterSecret"
 survey:
+  - type: "text"
+    question: "Describe your experience with GoLang."
+    result: "wordcloud"
   - type: "multiple"
     question: "Which programming languages do you use?"
     answers:
@@ -16,6 +19,3 @@ survey:
       - "no"
       - "coffee"
     result: "bar"
-  - type: "text"
-    question: "Describe your experience with GoLang."
-    result: "wordcloud"

@@ -12,10 +12,20 @@
     <div id="emoji-buttons">
         <button class="emoji-btn" onclick="sendEmoji('👍')">👍</button>
         <button class="emoji-btn" onclick="sendEmoji('👏')">👏</button>
-        <button class="emoji-btn" onclick="sendEmoji('🎉')">🎉</button>
-        <button class="emoji-btn" onclick="sendEmoji('❤️')">❤️</button>
-        <button class="emoji-btn" onclick="sendEmoji('🚀')">🚀</button>
+        <button class="emoji-btn" onclick="sendEmoji('💯')">💯</button>
+        <button class="emoji-btn" onclick="sendEmoji('💩')">💩</button>
+        <button class="emoji-btn" onclick="sendEmoji('👎')">👎</button>
     </div>
     <script src="/static/js/app.js"></script>
+    <script>
+window.document.onload = function(e){
+    window.appState.enableEmojis = true;
+}
+
+document.addEventListener('DOMContentLoaded', function() {
+  // This code runs when the basic structure of the page has loaded
+  window.appState.enableEmojis = true;
+});
+        </script>
 </body>
 </html>
