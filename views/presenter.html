@@ -1,32 +1,77 @@
 <!DOCTYPE html>
 <html lang="en">
-
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Survey App</title>
+    <title>Presenter View - Survey App</title>
     <link rel="stylesheet" href="/static/css/base.css">
     <script src="https://unpkg.com/htmx.org@1.9.10"></script>
-
+    <style>
+        #navbar {
+            position: fixed;
+            top: -60px;
+            left: 0;
+            right: 0;
+            height: 60px;
+            background-color: #006b2b8b;
+            color: white;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 0 20px;
+            transition: top 0.3s;
+        }
+        #content {
+            padding-top: 20px;
+        }
+        .start-slide {
+            text-align: center;
+            margin-top: 50px;
+        }
+    </style>
 </head>
-
 <body>
-    <h1>Hi Presenter!</h1>
-    <p>Everyone is waiting for your next move.</p>
-
-    <button hx-get="/nextSlide" hx-target="#content" hx-swap="innerHTML">Start Survey</button>
-
-    <div id="content"></div>
-
-    <div class="bottom-icons">
-    <div class="user-info">
-      <span class="user-icon">
-        <svg xmlns="http://www.w3.org/2000/svg" width="2em" height="2em" viewBox="0 0 20 20"><path fill="currentColor" d="M10 9a3 3 0 1 0 0-6a3 3 0 0 0 0 6M6 8a2 2 0 1 1-4 0a2 2 0 0 1 4 0m-4.51 7.326a.78.78 0 0 1-.358-.442a3 3 0 0 1 4.308-3.516a6.48 6.48 0 0 0-1.905 3.959q-.034.335.025.654a5 5 0 0 1-2.07-.655m14.95.654a5 5 0 0 0 2.07-.654a.78.78 0 0 0 .357-.442a3 3 0 0 0-4.308-3.517a6.48 6.48 0 0 1 1.907 3.96a2.3 2.3 0 0 1-.026.654M18 8a2 2 0 1 1-4 0a2 2 0 0 1 4 0M5.304 16.19a.84.84 0 0 1-.277-.71a5 5 0 0 1 9.947 0a.84.84 0 0 1-.277.71A6.98 6.98 0 0 1 10 18a6.97 6.97 0 0 1-4.696-1.81"/></svg>          </span>
-          <span id="user-count">0</span>
-      </div>
+    <div id="navbar">
+        <div class="user-info">
+            <span class="user-icon">👤</span>
+            <span id="user-count">0</span>
+        </div>
+        <button hx-get="/nextSlide">Next Slide</button>
     </div>
-    <script src="/static/js/presenter.js"></script>
 
+    <div id="content">
+        <div class="start-slide">
+            <h1>Hi Presenter!</h1>
+            <p>Everyone is waiting for your next move.</p>
+            <button hx-get="/nextSlide" hx-target="#content" hx-swap="innerHTML">Start Survey</button>
+        </div>
+    </div>
+
+    <script>
+        let timeout;
+        document.addEventListener('mousemove', function(e) {
+            clearTimeout(timeout);
+            if (e.clientY < 10) {
+                document.getElementById('navbar').style.top = '0';
+            }
+            timeout = setTimeout(function() {
+                document.getElementById('navbar').style.top = '-60px';
+            }, 3000);
+        });
+
+        // WebSocket connection
+        const socket = new WebSocket('ws://' + window.location.host + '/ws');
+        const token = "{{ .Token }}"
+        socket.onmessage = function(event) {
+            const message = JSON.parse(event.data);
+            if (message.type === "userCount") {
+                document.getElementById('user-count').textContent = message.payload;
+            } else if (message.type === "finished") {
+                window.location.href = `/completed/${token}`;
+            } else if (message.type === "newSlide") {
+                htmx.ajax('GET', `/results/${token}`, '#content');
+            }
+        };
+    </script>
 </body>
-
 </html>

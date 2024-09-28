@@ -200,7 +200,9 @@ func handlePresenter(c echo.Context) error {
 		return c.String(http.StatusUnauthorized, "Unauthorized")
 	}
 
-	return c.Render(http.StatusOK, "presenter.html", nil)
+	return c.Render(http.StatusOK, "presenter.html", map[string]interface{}{
+		"Token": config.Token,
+	})
 }
 
 func handleSurvey(c echo.Context) error {
@@ -410,14 +412,9 @@ func handleNextSlide(c echo.Context) error {
 		broadcast <- Message{Type: "finished", Payload: true}
 		return c.NoContent(http.StatusSeeOther)
 	}
-	type SurveyResults map[string]int
-	emptyResults := make(SurveyResults)
+	
 	broadcast <- Message{Type: "newSlide", Payload: currentSlide}
-	return c.Render(http.StatusOK, "results.html", map[string]interface{}{
-		"Slide":       config.Survey[currentSlide],
-		"Results":     emptyResults,
-		"HasAnswered": false,
-	})
+	return c.NoContent(http.StatusOK)
 }
 
 func handleMessages() {
