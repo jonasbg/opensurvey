@@ -27,7 +27,7 @@ function updateWordCloud() {
             if (weight !== currentWeight) {
                 li.setAttribute('data-weight', weight);
                 li.style.fontSize = `${fontSize}px`;
-                li.parentNode.style.animation = 'updatePulse 0.5s ease-out';
+                li.parentNode.style.animation = 'updatePulse 1s ease-in-out';
                 li.parentNode.addEventListener('animationend', () => {
                     li.parentNode.style.animation = '';
                 }, {once: true});
@@ -43,24 +43,14 @@ function updateWordCloud() {
 
             const newLi = document.createElement('li');
             newLi.appendChild(li);
-            newLi.style.animation = 'fadeInScale 0.5s ease-out';
+            newLi.style.animation = 'fadeInScale 1s ease-out-out';
             wordcloud.appendChild(newLi);
 
             newLi.addEventListener('animationend', () => {
                 newLi.style.animation = '';
             }, {once: true});
         }
-        currentWords.delete(word);
     }
-
-    // Remove words that are no longer present
-    currentWords.forEach(word => {
-        const li = wordcloud.querySelector(`li a[data-word="${word}"]`).parentNode;
-        li.style.animation = 'fadeOutScale 0.5s ease-out';
-        li.addEventListener('animationend', () => {
-            li.remove();
-        }, {once: true});
-    });
 }
 
 function calculateWordCloudData(results) {
