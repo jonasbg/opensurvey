@@ -6,61 +6,82 @@
     <title>Survey Results</title>
     <link rel="stylesheet" href="/static/css/base.css">
     <style>
-#chart-container {
-    width: 400px;
-    margin: 0 auto;
-}
+        #chart-container {
+            width: 100%;
+            max-width: 600px;
+            margin: 0 auto;
+        }
 
-.bar-chart {
-    display: grid;
-    grid-template-columns: 100px 1fr;
-    gap: 5px;
-}
+        .bar-chart {
+            display: grid;
+            grid-template-columns: minmax(100px, 1fr) 2fr;
+            gap: 10px;
+        }
 
-.bar {
-    display: contents;
-}
+        .bar {
+            display: contents;
+        }
 
-.bar-label {
-    text-align: right;
-    padding-right: 10px;
-    font-size: 1.5em;
-    white-space: nowrap;
-    overflow: hidden;
-    text-overflow: ellipsis;
-}
+        .bar-label {
+            text-align: right;
+            padding-right: 10px;
+            font-size: 1em;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
 
-.bar-value {
-    background-color: #4CAF50;
-    height: 40px;
-    transition: width 0.5s ease-in-out, background-color 0.5s ease-in-out;
-    border-radius: 5px;
-}
+        .bar-background {
+            background-color: rgba(76, 175, 80, 0.2);
+            height: 30px;
+            border-radius: 5px;
+        }
 
-@keyframes fadeIn {
-    from { opacity: 0; }
-    to { opacity: 1; }
-}
+        .bar-value {
+            background-color: #4CAF50;
+            height: 100%;
+            transition: width 0.5s ease-in-out, background-color 0.5s ease-in-out;
+            border-radius: 5px;
+        }
 
-@keyframes scaleIn {
-    from { transform: scale(0.9); }
-    to { transform: scale(1); }
-}
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
 
-#wordcloud li {
-    animation: fadeIn 0.5s ease-out, scaleIn 0.5s ease-out;
-}
+        @keyframes scaleIn {
+            from { transform: scale(0.9); }
+            to { transform: scale(1); }
+        }
 
-.bar-value.updated {
-    animation: pulse 0.5s ease-in-out;
-}
+        #wordcloud li {
+            animation: fadeIn 0.5s ease-out, scaleIn 0.5s ease-out;
+        }
 
-@keyframes pulse {
-    0% { transform: scale(1); }
-    50% { transform: scale(1.05); }
-    100% { transform: scale(1); }
-}
+        .bar-value.updated {
+            animation: pulse 0.5s ease-in-out;
+        }
 
+        @keyframes pulse {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.05); }
+            100% { transform: scale(1); }
+        }
+
+        @media (max-width: 600px) {
+            .bar-chart {
+                grid-template-columns: 1fr;
+            }
+
+            .bar-label {
+                text-align: left;
+                padding-left: 5px;
+            }
+
+            .bar-background {
+                height: 25px;
+            }
+        }
     </style>
 </head>
 <body>
@@ -71,21 +92,25 @@
         {{if eq .Slide.ResultType "wordcloud"}}
             {{template "wordcloud" .}}
         {{else if eq .Slide.ResultType "bar"}}
-        <div id="chart-container" class="bar-chart"></div>
+            <div id="chart-container" class="bar-chart">
+                {{range $answer, $count := .Results}}
+                <div class="bar" data-answer="{{$answer}}">
+                    <div class="bar-label">{{$answer}}</div>
+                    <div class="bar-background">
+                        <div class="bar-value" style="width: 0%;" data-count="{{$count}}"></div>
+                    </div>
+                </div>
+                {{end}}
+            </div>
         {{end}}
-        <ul id="results-list" style="display: none;">
-            {{range $answer, $count := .Results}}
-                <li data-answer="{{$answer}}">{{$answer}}: <span class="count">{{$count}}</span></li>
-            {{end}}
-        </ul>
     </div>
 
     <div class="bottom-icons">
         <div class="user-info">
             <span class="user-icon">
-                <svg xmlns="http://www.w3.org/2000/svg" width="2em" height="2em" viewBox="0 0 20 20"><path fill="currentColor" d="M10 9a3 3 0 1 0 0-6a3 3 0 0 0 0 6M6 8a2 2 0 1 1-4 0a2 2 0 0 1 4 0m-4.51 7.326a.78.78 0 0 1-.358-.442a3 3 0 0 1 4.308-3.516a6.48 6.48 0 0 0-1.905 3.959q-.034.335.025.654a5 5 0 0 1-2.07-.655m14.95.654a5 5 0 0 0 2.07-.654a.78.78 0 0 0 .357-.442a3 3 0 0 0-4.308-3.517a6.48 6.48 0 0 1 1.907 3.96a2.3 2.3 0 0 1-.026.654M18 8a2 2 0 1 1-4 0a2 2 0 0 1 4 0M5.304 16.19a.84.84 0 0 1-.277-.71a5 5 0 0 1 9.947 0a.84.84 0 0 1-.277.71A6.98 6.98 0 0 1 10 18a6.97 6.97 0 0 1-4.696-1.81"/></svg>          </span>
-                <span id="user-count">0</span>
+                <svg xmlns="http://www.w3.org/2000/svg" width="2em" height="2em" viewBox="0 0 20 20"><path fill="currentColor" d="M10 9a3 3 0 1 0 0-6a3 3 0 0 0 0 6M6 8a2 2 0 1 1-4 0a2 2 0 0 1 4 0m-4.51 7.326a.78.78 0 0 1-.358-.442a3 3 0 0 1 4.308-3.516a6.48 6.48 0 0 0-1.905 3.959q-.034.335.025.654a5 5 0 0 1-2.07-.655m14.95.654a5 5 0 0 0 2.07-.654a.78.78 0 0 0 .357-.442a3 3 0 0 0-4.308-3.517a6.48 6.48 0 0 1 1.907 3.96a2.3 2.3 0 0 1-.026.654M18 8a2 2 0 1 1-4 0a2 2 0 0 1 4 0M5.304 16.19a.84.84 0 0 1-.277-.71a5 5 0 0 1 9.947 0a.84.84 0 0 1-.277.71A6.98 6.98 0 0 1 10 18a6.97 6.97 0 0 1-4.696-1.81"/></svg>
             </span>
+            <span id="user-count">0</span>
         </div>
         <button id="emoji-button" class="emoji-button">🎉</button>
     </div>
@@ -102,11 +127,12 @@
 
         Object.entries(results).forEach(([answer, count]) => {
             let bar = container.querySelector(`.bar[data-answer="${answer}"]`);
-            const width = (count / maxValue) * 100;
+            const width = maxValue > 0 ? (count / maxValue) * 100 : 0;
 
             if (bar) {
                 const value = bar.querySelector('.bar-value');
                 value.style.width = `${width}%`;
+                value.setAttribute('data-count', count);
                 value.classList.add('updated');
                 setTimeout(() => value.classList.remove('updated'), 500);
             } else {
@@ -118,21 +144,18 @@
                 label.className = 'bar-label';
                 label.textContent = answer;
 
+                const background = document.createElement('div');
+                background.className = 'bar-background';
+
                 const value = document.createElement('div');
                 value.className = 'bar-value';
                 value.style.width = `${width}%`;
+                value.setAttribute('data-count', count);
 
+                background.appendChild(value);
                 bar.appendChild(label);
-                bar.appendChild(value);
+                bar.appendChild(background);
                 container.appendChild(bar);
-            }
-        });
-
-        // Remove bars for answers that no longer exist
-        container.querySelectorAll('.bar').forEach(bar => {
-            const answer = bar.getAttribute('data-answer');
-            if (!(answer in results)) {
-                bar.remove();
             }
         });
     }
@@ -150,13 +173,13 @@
 
     addEventListener("DOMContentLoaded", (event) => {
         window.appState.enableEmojis = true;
-        const resultsList = document.getElementById('results-list');
-        if (resultsList) {
+        const chartContainer = document.getElementById('chart-container');
+        if (chartContainer) {
             const initialResults = {};
-            const listItems = resultsList.querySelectorAll('li');
-            listItems.forEach(li => {
-                const answer = li.getAttribute('data-answer');
-                const count = parseInt(li.querySelector('.count').textContent);
+            const bars = chartContainer.querySelectorAll('.bar');
+            bars.forEach(bar => {
+                const answer = bar.getAttribute('data-answer');
+                const count = parseInt(bar.querySelector('.bar-value').getAttribute('data-count'));
                 initialResults[answer] = count;
             });
 

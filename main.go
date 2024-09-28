@@ -351,8 +351,16 @@ func handleResults(c echo.Context) error {
 	results := getResults(token)
 	hasAnswered := hasUserAnswered(token, int(currentSlide), userID)
 
+	// Add all possible answers to the results
+	currentSlide := config.Survey[currentSlide]
+	for _, answer := range currentSlide.Answers {
+		if _, exists := results[answer]; !exists {
+			results[answer] = 0
+		}
+	}
+
 	return c.Render(http.StatusOK, "results.html", map[string]interface{}{
-		"Slide":       config.Survey[currentSlide],
+		"Slide":       currentSlide,
 		"Results":     results,
 		"HasAnswered": hasAnswered,
 	})
@@ -412,7 +420,7 @@ func handleNextSlide(c echo.Context) error {
 		broadcast <- Message{Type: "finished", Payload: true}
 		return c.NoContent(http.StatusSeeOther)
 	}
-	
+
 	broadcast <- Message{Type: "newSlide", Payload: currentSlide}
 	return c.NoContent(http.StatusOK)
 }

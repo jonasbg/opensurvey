@@ -1,12 +1,13 @@
 #chart-container {
-  width: 400px;
+  width: 100%;
+  max-width: 600px;
   margin: 0 auto;
 }
 
 .bar-chart {
   display: grid;
-  grid-template-columns: 100px 1fr;
-  gap: 5px;
+  grid-template-columns: minmax(100px, 1fr) 2fr;
+  gap: 10px;
 }
 
 .bar {
@@ -16,15 +17,21 @@
 .bar-label {
   text-align: right;
   padding-right: 10px;
-  font-size: 1.5em;
+  font-size: 1em;
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
 }
 
+.bar-background {
+  background-color: rgba(76, 175, 80, 0.2);
+  height: 30px;
+  border-radius: 5px;
+}
+
 .bar-value {
   background-color: #4CAF50;
-  height: 40px;
+  height: 100%;
   transition: width 0.5s ease-in-out, background-color 0.5s ease-in-out;
   border-radius: 5px;
 }
@@ -51,4 +58,19 @@
   0% { transform: scale(1); }
   50% { transform: scale(1.05); }
   100% { transform: scale(1); }
+}
+
+@media (max-width: 600px) {
+  .bar-chart {
+    grid-template-columns: 1fr;
+  }
+
+  .bar-label {
+    text-align: left;
+    padding-left: 5px;
+  }
+
+  .bar-background {
+    height: 25px;
+  }
 }

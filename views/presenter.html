@@ -88,7 +88,6 @@
         let timeout;
         const navbar = document.getElementById('navbar');
         const content = document.getElementById('content');
-        const userCountElements = document.getElementsByClassName('user-count');
         let currentSlide = -1;
 
         document.addEventListener('mousemove', function(e) {
@@ -122,8 +121,8 @@
         socket.onmessage = function(event) {
             const message = JSON.parse(event.data);
             if (message.type === "userCount") {
-              userCountElements.forEach(user => {
-                user.textContent = message.payload;
+              document.querySelectorAll('.user-count').forEach((element) => {
+                element.textContent = message.payload;
               });
             } else if (message.type === "newSlide") {
                 loadSlide(message.payload);
