@@ -1,149 +1,187 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Presenter View - Survey App</title>
-    <link rel="stylesheet" href="/static/css/base.css">
-    <script src="https://unpkg.com/htmx.org@1.9.10"></script>
-    <style>
-        body, html {
-            margin: 0;
-            padding: 0;
-            height: 100%;
-            overflow: hidden;
-        }
-        #navbar {
-            position: fixed;
-            top: -60px;
-            left: 0;
-            right: 0;
-            height: 60px;
-            background-color: #333;
-            color: white;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            padding: 0 20px;
-            transition: top 0.3s;
-            z-index: 1000;
-        }
-        #content {
-            height: 100%;
-            padding-top: 60px;
-            box-sizing: border-box;
-        }
-        iframe {
-            width: 100vw;
-            height: 100%;
-            border: none;
-        }
-        .start-slide {
-            text-align: center;
-            padding-top: 50px;
-        }
-        .user-info {
-    position: relative;
-    display: inline-block;
-  }
-  .user-info svg {
-    display: block;
-  }
-  .user-count {
-    position: absolute;
-    top: 50%;
-    left: 100%;
-    transform: translateY(-50%);
-    margin-left: 0.5em;
-    font-size: 1em;
-    white-space: nowrap;
-    height: min-content !important;
-  }
-    </style>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Presenter View - Survey App</title>
+  <link rel="stylesheet" href="/static/css/base.css">
+  <script src="https://unpkg.com/htmx.org@1.9.10"></script>
+  <style>
+    body,
+    html {
+      margin: 0;
+      padding: 0;
+      height: 100%;
+      overflow: hidden;
+    }
+
+    #navbar {
+      position: fixed;
+      top: -60px;
+      left: 0;
+      right: 0;
+      height: 60px;
+      background-color: #333;
+      color: white;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 0 20px;
+      transition: top 0.3s;
+      z-index: 1000;
+    }
+
+    #content {
+      height: 100%;
+      padding-top: 60px;
+      box-sizing: border-box;
+    }
+
+    iframe {
+      width: 100vw;
+      height: 95vh;
+      border: none;
+    }
+
+    .start-slide {
+      text-align: center;
+      padding-top: 50px;
+    }
+
+    .user-info {
+      position: relative;
+      display: inline-block;
+    }
+
+    .user-info svg {
+      display: block;
+    }
+
+    .user-count {
+      position: absolute;
+      top: 50%;
+      left: 100%;
+      transform: translateY(-50%);
+      margin-left: 0.5em;
+      font-size: 1em;
+      white-space: nowrap;
+      height: min-content !important;
+    }
+
+    .overlay {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      z-index: 1000;
+    }
+  </style>
 </head>
+
 <body>
-    <div id="navbar">
+  <div id="navbar">
+    <div class="user-info">
+      <svg xmlns="http://www.w3.org/2000/svg" width="2em" height="2em" viewBox="0 0 20 20">
+        <path fill="currentColor"
+          d="M10 9a3 3 0 1 0 0-6a3 3 0 0 0 0 6M6 8a2 2 0 1 1-4 0a2 2 0 0 1 4 0m-4.51 7.326a.78.78 0 0 1-.358-.442a3 3 0 0 1 4.308-3.516a6.48 6.48 0 0 0-1.905 3.959q-.034.335.025.654a5 5 0 0 1-2.07-.655m14.95.654a5 5 0 0 0 2.07-.654a.78.78 0 0 0 .357-.442a3 3 0 0 0-4.308-3.517a6.48 6.48 0 0 1 1.907 3.96a2.3 2.3 0 0 1-.026.654M18 8a2 2 0 1 1-4 0a2 2 0 0 1 4 0M5.304 16.19a.84.84 0 0 1-.277-.71a5 5 0 0 1 9.947 0a.84.84 0 0 1-.277.71A6.98 6.98 0 0 1 10 18a6.97 6.97 0 0 1-4.696-1.81" />
+      </svg> </span>
+      <span class="user-count">0</span>
+    </div>
+    <button style="margin-top:12px;" id="nextSlideBtn" hx-get="/nextSlide" hx-trigger="click" hx-swap="none">Next
+      Slide</button>
+  </div>
+
+  <div id="content">
+    <div class="start-slide">
+      <h1>Hi Presenter!</h1>
+      <p>Everyone is waiting for your next move.</p>
+      <button id="startSurveyBtn" hx-get="/nextSlide" hx-trigger="click" hx-swap="none">Start Survey</button>
+      <div>
         <div class="user-info">
-          <svg xmlns="http://www.w3.org/2000/svg" width="2em" height="2em" viewBox="0 0 20 20"><path fill="currentColor" d="M10 9a3 3 0 1 0 0-6a3 3 0 0 0 0 6M6 8a2 2 0 1 1-4 0a2 2 0 0 1 4 0m-4.51 7.326a.78.78 0 0 1-.358-.442a3 3 0 0 1 4.308-3.516a6.48 6.48 0 0 0-1.905 3.959q-.034.335.025.654a5 5 0 0 1-2.07-.655m14.95.654a5 5 0 0 0 2.07-.654a.78.78 0 0 0 .357-.442a3 3 0 0 0-4.308-3.517a6.48 6.48 0 0 1 1.907 3.96a2.3 2.3 0 0 1-.026.654M18 8a2 2 0 1 1-4 0a2 2 0 0 1 4 0M5.304 16.19a.84.84 0 0 1-.277-.71a5 5 0 0 1 9.947 0a.84.84 0 0 1-.277.71A6.98 6.98 0 0 1 10 18a6.97 6.97 0 0 1-4.696-1.81"/></svg>          </span>
+          <svg xmlns="http://www.w3.org/2000/svg" width="2em" height="2em" viewBox="0 0 20 20">
+            <path fill="currentColor"
+              d="M10 9a3 3 0 1 0 0-6a3 3 0 0 0 0 6M6 8a2 2 0 1 1-4 0a2 2 0 0 1 4 0m-4.51 7.326a.78.78 0 0 1-.358-.442a3 3 0 0 1 4.308-3.516a6.48 6.48 0 0 0-1.905 3.959q-.034.335.025.654a5 5 0 0 1-2.07-.655m14.95.654a5 5 0 0 0 2.07-.654a.78.78 0 0 0 .357-.442a3 3 0 0 0-4.308-3.517a6.48 6.48 0 0 1 1.907 3.96a2.3 2.3 0 0 1-.026.654M18 8a2 2 0 1 1-4 0a2 2 0 0 1 4 0M5.304 16.19a.84.84 0 0 1-.277-.71a5 5 0 0 1 9.947 0a.84.84 0 0 1-.277.71A6.98 6.98 0 0 1 10 18a6.97 6.97 0 0 1-4.696-1.81" />
+          </svg> </span>
           <span class="user-count">0</span>
         </div>
-        <button style="margin-top:12px;" id="nextSlideBtn" hx-get="/nextSlide" hx-trigger="click" hx-swap="none">Next Slide</button>
+      </div>
     </div>
+  </div>
 
-    <div id="content">
-        <div class="start-slide">
-            <h1>Hi Presenter!</h1>
-            <p>Everyone is waiting for your next move.</p>
-            <button id="startSurveyBtn" hx-get="/nextSlide" hx-trigger="click" hx-swap="none">Start Survey</button>
-            <div>
-              <div class="user-info">
-                <svg xmlns="http://www.w3.org/2000/svg" width="2em" height="2em" viewBox="0 0 20 20"><path fill="currentColor" d="M10 9a3 3 0 1 0 0-6a3 3 0 0 0 0 6M6 8a2 2 0 1 1-4 0a2 2 0 0 1 4 0m-4.51 7.326a.78.78 0 0 1-.358-.442a3 3 0 0 1 4.308-3.516a6.48 6.48 0 0 0-1.905 3.959q-.034.335.025.654a5 5 0 0 1-2.07-.655m14.95.654a5 5 0 0 0 2.07-.654a.78.78 0 0 0 .357-.442a3 3 0 0 0-4.308-3.517a6.48 6.48 0 0 1 1.907 3.96a2.3 2.3 0 0 1-.026.654M18 8a2 2 0 1 1-4 0a2 2 0 0 1 4 0M5.304 16.19a.84.84 0 0 1-.277-.71a5 5 0 0 1 9.947 0a.84.84 0 0 1-.277.71A6.98 6.98 0 0 1 10 18a6.97 6.97 0 0 1-4.696-1.81"/></svg>          </span>
-                <span class="user-count">0</span>
-              </div>
-            </div>
-        </div>
-    </div>
+  <script>
+    let timeout;
+    const navbar = document.getElementById('navbar');
+    const content = document.getElementById('content');
+    let currentSlide = -1;
 
-    <script>
-        let timeout;
-        const navbar = document.getElementById('navbar');
-        const content = document.getElementById('content');
-        let currentSlide = -1;
+    document.addEventListener('mousemove', function (e) {
+      clearTimeout(timeout);
+      if (e.clientY < 10) {
+        navbar.style.top = '0';
+      }
+      timeout = setTimeout(function () {
+        navbar.style.top = '-60px';
+      }, 3000);
+    });
 
-        document.addEventListener('mousemove', function(e) {
-            clearTimeout(timeout);
-            if (e.clientY < 10) {
-                navbar.style.top = '0';
-            }
-            timeout = setTimeout(function() {
-                navbar.style.top = '-60px';
-            }, 3000);
+    function loadSlide(slideNumber) {
+      currentSlide = slideNumber;
+      const iframe = document.createElement('iframe');
+      iframe.src = `/results/{{.Token}}?slide=${currentSlide}`;
+
+      // Create an overlay div
+      const overlay = document.createElement('div');
+      overlay.className = 'overlay';
+
+      // Wrap iframe in a container
+      const container = document.createElement('div');
+      container.style.position = 'relative';
+      container.appendChild(iframe);
+      container.appendChild(overlay);
+
+      content.innerHTML = '';
+      content.appendChild(container);
+    }
+
+    document.body.addEventListener('htmx:afterOnLoad', function (event) {
+      if (event.detail.elt.id === 'nextSlideBtn' || event.detail.elt.id === 'startSurveyBtn') {
+        loadSlide(currentSlide + 1);
+      }
+    });
+
+    // WebSocket connection
+    const socket = new WebSocket('ws://' + window.location.host + '/ws');
+    const token = "{{.Token}}"
+
+    socket.onmessage = function (event) {
+      const message = JSON.parse(event.data);
+      if (message.type === "userCount") {
+        document.querySelectorAll('.user-count').forEach((element) => {
+          element.textContent = message.payload;
         });
+      } else if (message.type === "newSlide") {
+        loadSlide(message.payload);
+      } else if (message.type === "finished") {
+        window.location.href = `/completed/${token}`
+      }
+    };
 
-        function loadSlide(slideNumber) {
-            currentSlide = slideNumber;
-            const iframe = document.createElement('iframe');
-            iframe.src = `/results/{{.Token}}?slide=${currentSlide}`;
-            content.innerHTML = '';
-            content.appendChild(iframe);
-        }
+    document.addEventListener('keydown', function (event) {
+      if (event.code === 'Space') {
+        event.preventDefault(); // Prevent scrolling
+        document.getElementById('nextSlideBtn').click();
+      }
+    });
 
-        document.body.addEventListener('htmx:afterOnLoad', function(event) {
-            if (event.detail.elt.id === 'nextSlideBtn' || event.detail.elt.id === 'startSurveyBtn') {
-                loadSlide(currentSlide + 1);
-            }
-        });
-
-        // WebSocket connection
-        const socket = new WebSocket('ws://' + window.location.host + '/ws');
-        const token = "{{.Token}}"
-
-        socket.onmessage = function(event) {
-            const message = JSON.parse(event.data);
-            if (message.type === "userCount") {
-              document.querySelectorAll('.user-count').forEach((element) => {
-                element.textContent = message.payload;
-              });
-            } else if (message.type === "newSlide") {
-                loadSlide(message.payload);
-            } else if (message.type === "finished") {
-              window.location.href = `/completed/${token}`
-            }
-        };
-
-        document.addEventListener('keydown', function(event) {
-          if (event.code === 'Space') {
-            event.preventDefault(); // Prevent scrolling
-            document.getElementById('nextSlideBtn').click();
-          }
-        });
-
-        socket.onclose = function(event) {
-            console.log("WebSocket connection closed. Reconnecting...");
-            setTimeout(() => {
-                window.location.reload();
-            }, 1000);
-        };
-    </script>
+    socket.onclose = function (event) {
+      console.log("WebSocket connection closed. Reconnecting...");
+      setTimeout(() => {
+        window.location.reload();
+      }, 1000);
+    };
+  </script>
 </body>
+
 </html>
