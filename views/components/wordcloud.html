@@ -2,8 +2,8 @@
 <link rel="stylesheet" href="/static/css/wordcloud.css">
 
 <ul id="wordcloud" class="cloud" role="navigation" aria-label="Word cloud">
-    {{range $word, $weight := .Results}}
-    <li><a href="#" data-weight="{{$weight}}" data-word="{{$word}}">{{$word}}</a></li>
+    {{range .Results}}
+        <li><a href="#" data-weight="{{.Count}}" data-word="{{.Answer}}">{{.Answer}}</a></li>
     {{end}}
 </ul>
 

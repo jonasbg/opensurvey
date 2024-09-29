@@ -6,6 +6,13 @@ survey:
     question: "Describe your experience with GoLang."
     result: "wordcloud"
   - type: "multiple"
+    question: "What is your role?"
+    answers:
+      - "Junior"
+      - "Senior"
+      - "Elite"
+    result: "bar"
+  - type: "multiple"
     question: "Which programming languages do you use?"
     answers:
       - "Go"

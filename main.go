@@ -424,17 +424,27 @@ func handleResults(c echo.Context) error {
 	results := getResults(token)
 	hasAnswered := hasUserAnswered(token, int(currentSlide), userID)
 
-	// Add all possible answers to the results
-	currentSlide := config.Survey[currentSlide]
-	for _, answer := range currentSlide.Answers {
-		if _, exists := results[answer]; !exists {
-			results[answer] = 0
+	// Create a slice to store results in order
+	orderedResults := make([]struct {
+		Answer string
+		Count  int
+	}, len(config.Survey[currentSlide].Answers))
+
+	// Populate the orderedResults slice
+	for i, answer := range config.Survey[currentSlide].Answers {
+		count := 0
+		if val, exists := results[answer]; exists {
+			count = val
 		}
+		orderedResults[i] = struct {
+			Answer string
+			Count  int
+		}{Answer: answer, Count: count}
 	}
 
 	return c.Render(http.StatusOK, "results.html", map[string]interface{}{
-		"Slide":       currentSlide,
-		"Results":     results,
+		"Slide":       config.Survey[currentSlide],
+		"Results":     orderedResults,
 		"HasAnswered": hasAnswered,
 	})
 }

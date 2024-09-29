@@ -17,15 +17,15 @@
         {{template "wordcloud" .}}
         {{else if eq .Slide.ResultType "bar"}}
         <div id="chart-container" class="bar-chart">
-            {{range $answer, $count := .Results}}
-            <div class="bar" data-answer="{{$answer}}" data-count="{{$count}}">
-                <div class="bar-background">
-                    <div class="bar-value" style="width: 0%;">
-                        <span class="bar-label">{{$answer}}</span>
-                        <span class="bar-count">{{$count}}</span>
+            {{range .Results}}
+                <div class="bar" data-answer="{{.Answer}}" data-count="{{.Count}}">
+                    <div class="bar-background">
+                        <div class="bar-value" style="width: 0%;">
+                            <span class="bar-label">{{.Answer}}</span>
+                            <span class="bar-count">{{.Count}}</span>
+                        </div>
                     </div>
                 </div>
-            </div>
             {{end}}
         </div>
         {{end}}
