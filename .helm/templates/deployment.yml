@@ -14,7 +14,7 @@ spec:
     spec:
       containers:
         - name: {{ .Release.Name }}-api
-          image: "{{ .Values.image.repository }}:{{ .Values.image.tag }}"
+          image: "{{ .Values.image.repository }}:{{ .Values.image.tag }}@{{ .Values.image.digest }}"
           imagePullPolicy: {{ .Values.image.pullPolicy }}
           securityContext:
             capabilities:
