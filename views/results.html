@@ -1,38 +1,43 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Survey Results</title>
     <link rel="stylesheet" href="/static/css/base.css">
 </head>
+
 <body>
     {{if ne .Slide.ResultType "wordcloud"}}
     <h1>{{.Slide.Question}}</h1>
     {{end}}
     <div id="results-container">
         {{if eq .Slide.ResultType "wordcloud"}}
-            {{template "wordcloud" .}}
+        {{template "wordcloud" .}}
         {{else if eq .Slide.ResultType "bar"}}
-            <div id="chart-container" class="bar-chart">
-                {{range $answer, $count := .Results}}
-                <div class="bar" data-answer="{{$answer}}" data-count="{{$count}}">
-                    <div class="bar-background">
-                        <div class="bar-value" style="width: 0%;">
-                            <span class="bar-label">{{$answer}}</span>
-                            <span class="bar-count">{{$count}}</span>
-                        </div>
+        <div id="chart-container" class="bar-chart">
+            {{range $answer, $count := .Results}}
+            <div class="bar" data-answer="{{$answer}}" data-count="{{$count}}">
+                <div class="bar-background">
+                    <div class="bar-value" style="width: 0%;">
+                        <span class="bar-label">{{$answer}}</span>
+                        <span class="bar-count">{{$count}}</span>
                     </div>
                 </div>
-                {{end}}
             </div>
+            {{end}}
+        </div>
         {{end}}
     </div>
 
     <div class="bottom-icons">
         <div class="user-info">
             <span class="user-icon">
-                <svg xmlns="http://www.w3.org/2000/svg" width="2em" height="2em" viewBox="0 0 20 20"><path fill="currentColor" d="M10 9a3 3 0 1 0 0-6a3 3 0 0 0 0 6M6 8a2 2 0 1 1-4 0a2 2 0 0 1 4 0m-4.51 7.326a.78.78 0 0 1-.358-.442a3 3 0 0 1 4.308-3.516a6.48 6.48 0 0 0-1.905 3.959q-.034.335.025.654a5 5 0 0 1-2.07-.655m14.95.654a5 5 0 0 0 2.07-.654a.78.78 0 0 0 .357-.442a3 3 0 0 0-4.308-3.517a6.48 6.48 0 0 1 1.907 3.96a2.3 2.3 0 0 1-.026.654M18 8a2 2 0 1 1-4 0a2 2 0 0 1 4 0M5.304 16.19a.84.84 0 0 1-.277-.71a5 5 0 0 1 9.947 0a.84.84 0 0 1-.277.71A6.98 6.98 0 0 1 10 18a6.97 6.97 0 0 1-4.696-1.81"/></svg>
+                <svg xmlns="http://www.w3.org/2000/svg" width="2em" height="2em" viewBox="0 0 20 20">
+                    <path fill="currentColor"
+                        d="M10 9a3 3 0 1 0 0-6a3 3 0 0 0 0 6M6 8a2 2 0 1 1-4 0a2 2 0 0 1 4 0m-4.51 7.326a.78.78 0 0 1-.358-.442a3 3 0 0 1 4.308-3.516a6.48 6.48 0 0 0-1.905 3.959q-.034.335.025.654a5 5 0 0 1-2.07-.655m14.95.654a5 5 0 0 0 2.07-.654a.78.78 0 0 0 .357-.442a3 3 0 0 0-4.308-3.517a6.48 6.48 0 0 1 1.907 3.96a2.3 2.3 0 0 1-.026.654M18 8a2 2 0 1 1-4 0a2 2 0 0 1 4 0M5.304 16.19a.84.84 0 0 1-.277-.71a5 5 0 0 1 9.947 0a.84.84 0 0 1-.277.71A6.98 6.98 0 0 1 10 18a6.97 6.97 0 0 1-4.696-1.81" />
+                </svg>
             </span>
             <span id="user-count">0</span>
         </div>
@@ -42,81 +47,85 @@
     <script src="/static/js/app.js"></script>
 
     <script>
-function updateBarChart() {
-    const container = document.getElementById('chart-container');
-    if (!container) return;
+        function updateBarChart() {
+            const container = document.getElementById('chart-container');
+            if (!container) return;
 
-    const results = window.appState.results;
-    const maxValue = Math.max(...Object.values(results));
+            const results = window.appState.results;
+            const maxValue = Math.max(...Object.values(results));
 
-    Object.entries(results).forEach(([answer, count]) => {
-        let bar = container.querySelector(`.bar[data-answer="${answer}"]`);
-        const width = maxValue > 0 ? (count / maxValue) * 100 : 0;
+            Object.entries(results).forEach(([answer, count]) => {
+                let bar = container.querySelector(`.bar[data-answer="${answer}"]`);
+                const width = maxValue > 0 ? (count / maxValue) * 100 : 0;
 
-        if (bar) {
-            const background = bar.querySelector('.bar-background');
-            const value = bar.querySelector('.bar-value');
-            const countSpan = bar.querySelector('.bar-count');
+                if (bar) {
+                    const background = bar.querySelector('.bar-background');
+                    const value = bar.querySelector('.bar-value');
+                    const countSpan = bar.querySelector('.bar-count');
 
-            if (count === 0 || isNaN(count)) {
-                background.classList.add('transparent-background');
-                value.classList.add('transparent-background');
-                countSpan.classList.add('hidden');
-            } else {
-                background.classList.remove('transparent-background');
-                value.classList.remove('transparent-background');
-                countSpan.classList.remove('hidden');
-                value.style.width = `${width}%`;
-            }
+                    if (count === 0 || isNaN(count)) {
+                        background.classList.add('transparent-background');
+                        value.classList.add('transparent-background');
+                        countSpan.classList.add('hidden');
+                    } else {
+                        background.classList.remove('transparent-background');
+                        value.classList.remove('transparent-background');
+                        countSpan.classList.remove('hidden');
+                        value.style.width = `${width}%`;
+                    }
 
-            countSpan.textContent = count;
-            value.classList.add('updated');
-            setTimeout(() => value.classList.remove('updated'), 500);
-        } else {
-            bar = document.createElement('div');
-            bar.className = 'bar';
-            bar.setAttribute('data-answer', answer);
+                    countSpan.textContent = count;
+                    value.classList.add('updated');
+                    setTimeout(() => value.classList.remove('updated'), 500);
+                } else {
+                    bar = document.createElement('div');
+                    bar.className = 'bar';
+                    bar.setAttribute('data-answer', answer);
 
-            const label = document.createElement('div');
-            label.className = 'bar-label';
-            label.textContent = answer;
+                    const label = document.createElement('div');
+                    label.className = 'bar-label';
+                    label.textContent = answer;
 
-            const background = document.createElement('div');
-            background.className = 'bar-background';
+                    const background = document.createElement('div');
+                    background.className = 'bar-background';
 
 
-            const value = document.createElement('div');
-            value.className = 'bar-value';
-            if (count === 0 || isNaN(count)) {
-                value.classList.add('transparent-background');
-            } else {
-                value.style.width = `${width}%`;
-            }
+                    const value = document.createElement('div');
+                    value.className = 'bar-value';
+                    if (count === 0 || isNaN(count)) {
+                        value.classList.add('transparent-background');
+                    } else {
+                        value.style.width = `${width}%`;
+                    }
 
-            const countSpan = document.createElement('span');
-            countSpan.className = 'bar-count';
-            countSpan.textContent = count;
+                    const countSpan = document.createElement('span');
+                    countSpan.className = 'bar-count';
+                    countSpan.textContent = count;
 
-            if (count === 0 || isNaN(count)) {
-                countSpan.classList.add('hidden');
-            }
+                    if (count === 0 || isNaN(count)) {
+                        countSpan.classList.add('hidden');
+                    }
 
-            value.appendChild(countSpan);
-            background.appendChild(value);
-            bar.appendChild(label);
-            bar.appendChild(background);
-            container.appendChild(bar);
+                    value.appendChild(countSpan);
+                    background.appendChild(value);
+                    bar.appendChild(label);
+                    bar.appendChild(background);
+                    container.appendChild(bar);
+                }
+            });
         }
-    });
-}
-        window.appState.subscribe((key, value) => {
-            if (key === 'results') {
-                updateBarChart();
-            }
-        });
+
+        window.onload = function () {
+            window.appState.subscribe((key, value) => {
+                if (key === 'results') {
+                    updateBarChart();
+                }
+            });        };
+
 
         addEventListener("DOMContentLoaded", (event) => {
             window.appState.enableEmojis = true;
+
             const chartContainer = document.getElementById('chart-container');
 
             if (chartContainer) {
@@ -133,6 +142,7 @@ function updateBarChart() {
                 updateBarChart();
             }
         });
-        </script>
+    </script>
 </body>
+
 </html>

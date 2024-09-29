@@ -88,3 +88,10 @@ export function explodeEmoji(emojiElement) {
 
   emojiElement.remove();
 }
+
+export function removeAllEmojis() {
+  const emojis = document.querySelectorAll('.floating-emoji');
+  emojis.forEach(emoji => {
+      explodeEmoji(emoji);
+  });
+}

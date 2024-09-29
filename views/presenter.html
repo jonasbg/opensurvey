@@ -134,11 +134,12 @@
   </div>
 
   <script type="module">
-    import { createFloatingEmoji, explodeEmoji } from '/static/js/emoji.js';
+    import { createFloatingEmoji, explodeEmoji, removeAllEmojis } from '/static/js/emoji.js';
 
     // Make createFloatingEmoji and explodeEmoji available globally
     window.createFloatingEmoji = createFloatingEmoji;
     window.explodeEmoji = explodeEmoji;
+    window.removeAllEmojis = removeAllEmojis;
   </script>
 
 
@@ -147,6 +148,9 @@
     const navbar = document.getElementById('navbar');
     const content = document.getElementById('content');
     let currentSlide = -1;
+    window.appState = {
+      enableEmojis: true
+    }
 
     document.addEventListener('mousemove', function (e) {
       clearTimeout(timeout);
@@ -180,6 +184,8 @@
     document.body.addEventListener('htmx:afterOnLoad', function (event) {
       if (event.detail.elt.id === 'nextSlideBtn' || event.detail.elt.id === 'startSurveyBtn') {
         loadSlide(currentSlide + 1);
+        window.appState.enableEmojis = false
+        window.removeAllEmojis();
       }
     });
 
@@ -199,13 +205,15 @@
       } else if (message.type === "finished") {
                 window.location.href = `/completed/${token}`;
             } else if (message.type === "emoji") {
-                    const [emoji, id] = message.payload.split(';');
-                    createFloatingEmoji(emoji, message.payload);
+              if (window.appState.enableEmojis){
+                const [emoji, id] = message.payload.split(';');
+                createFloatingEmoji(emoji, message.payload);
+              }
             } else if (message.type === "emojiPopped") {
-                const emojiToRemove = document.querySelector(`[data-emoji-id="${message.payload}"]`);
-                if (emojiToRemove) {
-                    explodeEmoji(emojiToRemove);
-                }
+              const emojiToRemove = document.querySelector(`[data-emoji-id="${message.payload}"]`);
+              if (emojiToRemove) {
+                explodeEmoji(emojiToRemove);
+              }
             }
     };
 
