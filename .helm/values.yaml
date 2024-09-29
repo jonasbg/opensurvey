@@ -1,7 +1,8 @@
 replicaCount: 1
 image:
-  repository: ghcr.io/jonasbg/opensurvey
-  tag: "d553b27"
+  repository: ${REGISTRY}/${IMAGE_NAME}
+  tag: ${IMAGE_TAG}
+  digest: ${IMAGE_DIGEST}
   pullPolicy: IfNotPresent
 env:
   TZ: "Europe/Oslo"

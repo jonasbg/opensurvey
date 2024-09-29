@@ -34,6 +34,10 @@ jobs:
         with:
           images: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}
 
+      - name: Extract digest
+        id: digest
+        run: echo "digest=$(docker inspect --format='{{index .RepoDigests 0}}' ${{ steps.meta.outputs.tags }} | cut -d'@' -f2)" >> $GITHUB_OUTPUT
+
       - name: Build and push Docker image
         uses: docker/build-push-action@v4
         with:
@@ -47,9 +51,16 @@ jobs:
         with:
           version: v3.12.0
 
+      - name: Update Helm values.yaml
+        run: |
+          sed -i 's|${REGISTRY}|${{ env.REGISTRY }}|g' .helm/values.yaml
+          sed -i 's|${IMAGE_NAME}|${{ env.IMAGE_NAME }}|g' .helm/values.yaml
+          sed -i 's|${IMAGE_TAG}|${{ steps.meta.outputs.version }}|g' .helm/values.yaml
+          sed -i 's|${IMAGE_DIGEST}|${{ steps.digest.outputs.digest }}|g' .helm/values.yaml
+
       - name: Package Helm chart
         run: |
-          helm package .helm
+          helm package .helm --app-version ${{ steps.meta.outputs.version }}
 
       - name: Push Helm chart to GHCR
         run: |
