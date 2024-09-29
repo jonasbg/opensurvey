@@ -118,12 +118,13 @@ function updateBarChart() {
         addEventListener("DOMContentLoaded", (event) => {
             window.appState.enableEmojis = true;
             const chartContainer = document.getElementById('chart-container');
+
             if (chartContainer) {
                 const initialResults = {};
                 const bars = chartContainer.querySelectorAll('.bar');
                 bars.forEach(bar => {
                     const answer = bar.getAttribute('data-answer');
-                    const count = parseInt(bar.querySelector('.bar-value').getAttribute('data-count'));
+                    const count = parseInt(bar.getAttribute('data-count'));
                     initialResults[answer] = count;
                 });
 
