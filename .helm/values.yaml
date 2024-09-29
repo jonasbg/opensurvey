@@ -7,11 +7,8 @@ image:
 env:
   TZ: "Europe/Oslo"
 ingress:
-  enabled: true
+  enabled: false
   hostname: example.com
-  tls:
-    enabled: true
-    certResolver: cloudflare
 securityContext:
   runAsUser: 101
   runAsGroup: 101
