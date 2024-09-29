@@ -1,0 +1,120 @@
+#chart-container {
+  min-width: 50vw;
+  max-width: 600px;
+  margin: 0 auto;
+  padding: 20px;
+  box-sizing: border-box;
+  background-color: var(--background-color);
+}
+
+.bar-chart {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+.bar {
+  height: 60px;
+  background-color: var(--primary-light);
+  border-radius: 30px;
+  overflow: hidden;
+  position: relative;
+}
+
+.bar-background {
+  width: 100%;
+  height: 100%;
+}
+
+.bar-value {
+  height: 100%;
+  background-color: var(--primary-color);
+  border-radius: 30px;
+  transition: width 0.5s ease-in-out;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 20px;
+  box-sizing: border-box;
+}
+
+.bar-label {
+  color: var(--background-color);
+  font-family: Arial, sans-serif;
+  font-weight: bold;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+  max-width: calc(100% - 50px);
+  margin-bottom: 0;
+}
+
+.bar-count {
+  color: var(--background-color);
+  font-family: Arial, sans-serif;
+  font-weight: bold;
+  background-color: var(--primary-darker);
+  border-radius: 50%;
+  width: 40px;
+  height: 40px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-bottom: 0;
+  line-height: normal !important;
+}
+
+.hidden {
+  display: none;
+}
+
+.transparent-background {
+  background-color: transparent;
+}
+
+@media (max-width: 480px) {
+  .bar {
+    height: 45px;
+  }
+
+  .bar-label, .bar-count {
+    font-size: 12px;
+  }
+
+  .bar-count {
+    width: 30px;
+    height: 30px;
+  }
+}
+
+/* Label count animation styles */
+@property --count {
+  syntax: "<number>";
+  initial-value: 0;
+  inherits: false;
+}
+
+@property --temp {
+  syntax: "<number>";
+  initial-value: 0;
+  inherits: false;
+}
+
+@property --int {
+  syntax: "<integer>";
+  initial-value: 0;
+  inherits: false;
+}
+
+@property --frac {
+  syntax: "<integer>";
+  initial-value: 0;
+  inherits: false;
+}
+
+.bar-count {
+  transition: --count 1s;
+  --temp: calc(var(--count) * 100);
+  --int: max(var(--temp) - 0.5, 0);
+  --frac: max((var(--temp) - var(--int)) * 100 - 0.5, 0);
+  counter-reset: int var(--int) frac var(--frac);
+}

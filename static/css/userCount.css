@@ -1,0 +1,37 @@
+.user-icon{
+  line-height: normal !important;
+}
+.user-count{
+  height: 100% !important;
+  align-content: center !important;
+  font-size: 1.5em !important;
+}
+
+@property --count {
+      syntax: "<number>";
+      initial-value: 0;
+      inherits: false;
+  }
+  @property --temp {
+      syntax: "<number>";
+      initial-value: 0;
+      inherits: false;
+  }
+  @property --int {
+      syntax: "<integer>";
+      initial-value: 0;
+      inherits: false;
+  }
+  @property --frac {
+      syntax: "<integer>";
+      initial-value: 0;
+      inherits: false;
+  }
+
+  #user-count {
+      transition: --count 1s;
+      --temp: calc(var(--count) * 100);
+      --int: max(var(--temp) - 0.5, 0);
+      --frac: max((var(--temp) - var(--int)) * 100 - 0.5, 0);
+      counter-reset: int var(--int) frac var(--frac);
+  }

@@ -15,5 +15,15 @@
     <button onclick="sendEmoji('🚀')">🚀</button>
 </div> -->
 {{end}}
+<script>
 
+window.document.onload = function(e){
+    window.appState.enableEmojis = true;
+}
+document.addEventListener('DOMContentLoaded', function() {
+  // This code runs when the basic structure of the page has loaded
+  window.appState.enableEmojis = true;
+});
+
+</script>
 {{template "base.html" .}}

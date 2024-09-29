@@ -4,60 +4,36 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Survey Results</title>
-    <link rel="stylesheet" href="/static/css/style.css">
-    <link rel="stylesheet" href="/static/css/wordcloud.css">
-    <style>
-#chart-container {
-    width: 300px;
-    margin: 0 auto;
-}
-
-.bar-chart {
-    display: grid;
-    grid-template-columns: 100px 1fr;
-    gap: 5px;
-}
-
-.bar {
-    display: contents;
-}
-
-.bar-label {
-    text-align: right;
-    padding-right: 10px;
-    font-size: larger;
-}
-
-.bar-value {
-    background-color: #4CAF50;
-    height: 40px;
-    transition: width 0.5s ease-in-out;
-    border-radius: 5px;
-}
-    </style>
+    <link rel="stylesheet" href="/static/css/base.css">
 </head>
 <body>
+    {{if ne .Slide.ResultType "wordcloud"}}
     <h1>{{.Slide.Question}}</h1>
+    {{end}}
     <div id="results-container">
         {{if eq .Slide.ResultType "wordcloud"}}
-        <ul id="wordcloud" class="cloud" role="navigation" aria-label="Word cloud">
-            {{range $word, $weight := .WordCloudData}}
-            <li><a href="#" data-weight="{{$weight}}">{{$word}}</a></li>
-            {{end}}
-        </ul>
+            {{template "wordcloud" .}}
         {{else if eq .Slide.ResultType "bar"}}
-        <div id="chart-container" class="bar-chart"></div>
+            <div id="chart-container" class="bar-chart">
+                {{range $answer, $count := .Results}}
+                <div class="bar" data-answer="{{$answer}}" data-count="{{$count}}">
+                    <div class="bar-background">
+                        <div class="bar-value" style="width: 0%;">
+                            <span class="bar-label">{{$answer}}</span>
+                            <span class="bar-count">{{$count}}</span>
+                        </div>
+                    </div>
+                </div>
+                {{end}}
+            </div>
         {{end}}
-        <ul id="results-list" style="visibility: hidden;">
-            {{range $answer, $count := .Results}}
-                <li data-answer="{{$answer}}">{{$answer}}: <span class="count">{{$count}}</span></li>
-            {{end}}
-        </ul>
     </div>
 
     <div class="bottom-icons">
         <div class="user-info">
-            <span class="user-icon">👤</span>
+            <span class="user-icon">
+                <svg xmlns="http://www.w3.org/2000/svg" width="2em" height="2em" viewBox="0 0 20 20"><path fill="currentColor" d="M10 9a3 3 0 1 0 0-6a3 3 0 0 0 0 6M6 8a2 2 0 1 1-4 0a2 2 0 0 1 4 0m-4.51 7.326a.78.78 0 0 1-.358-.442a3 3 0 0 1 4.308-3.516a6.48 6.48 0 0 0-1.905 3.959q-.034.335.025.654a5 5 0 0 1-2.07-.655m14.95.654a5 5 0 0 0 2.07-.654a.78.78 0 0 0 .357-.442a3 3 0 0 0-4.308-3.517a6.48 6.48 0 0 1 1.907 3.96a2.3 2.3 0 0 1-.026.654M18 8a2 2 0 1 1-4 0a2 2 0 0 1 4 0M5.304 16.19a.84.84 0 0 1-.277-.71a5 5 0 0 1 9.947 0a.84.84 0 0 1-.277.71A6.98 6.98 0 0 1 10 18a6.97 6.97 0 0 1-4.696-1.81"/></svg>
+            </span>
             <span id="user-count">0</span>
         </div>
         <button id="emoji-button" class="emoji-button">🎉</button>
@@ -66,115 +42,97 @@
     <script src="/static/js/app.js"></script>
 
     <script>
-    window.appState = {
-        results: {},
-        userCount: 0,
-        subscribers: [],
+function updateBarChart() {
+    const container = document.getElementById('chart-container');
+    if (!container) return;
 
-        setState: function(key, value) {
-            this[key] = value;
-            this.notifySubscribers(key, value);
-        },
+    const results = window.appState.results;
+    const maxValue = Math.max(...Object.values(results));
 
-        subscribe: function(callback) {
-            this.subscribers.push(callback);
-        },
+    Object.entries(results).forEach(([answer, count]) => {
+        let bar = container.querySelector(`.bar[data-answer="${answer}"]`);
+        const width = maxValue > 0 ? (count / maxValue) * 100 : 0;
 
-        notifySubscribers: function(key, value) {
-            this.subscribers.forEach(callback => callback(key, value));
-        }
-    };
+        if (bar) {
+            const background = bar.querySelector('.bar-background');
+            const value = bar.querySelector('.bar-value');
+            const countSpan = bar.querySelector('.bar-count');
 
-    function updateWordCloud() {
-        const wordcloud = document.getElementById('wordcloud');
-        if (!wordcloud) return;
+            if (count === 0 || isNaN(count)) {
+                background.classList.add('transparent-background');
+                value.classList.add('transparent-background');
+                countSpan.classList.add('hidden');
+            } else {
+                background.classList.remove('transparent-background');
+                value.classList.remove('transparent-background');
+                countSpan.classList.remove('hidden');
+                value.style.width = `${width}%`;
+            }
 
-        wordcloud.innerHTML = '';
-
-        const wordCloudData = window.appState.wordCloudData;
-
-        for (const [word, weight] of Object.entries(wordCloudData)) {
-            const li = document.createElement('li');
-            const a = document.createElement('a');
-            a.href = '#';
-            a.setAttribute('data-weight', weight);
-            a.textContent = word;
-            li.appendChild(a);
-            wordcloud.appendChild(li);
-        }
-    }
-
-    function calculateWordCloudData(results) {
-        const wordCloudData = {};
-        Object.entries(results).forEach(([answer, count]) => {
-            const words = answer.toLowerCase().split(/\s+/);
-            words.forEach(word => {
-                if (word.length > 0) {
-                    wordCloudData[word] = (wordCloudData[word] || 0) + count;
-                }
-            });
-        });
-        return wordCloudData;
-    }
-
-    function updateBarChart() {
-        const container = document.getElementById('chart-container');
-        if (!container) return;
-
-        container.innerHTML = '';
-        const results = window.appState.results;
-        const maxValue = Math.max(...Object.values(results));
-
-        Object.entries(results).forEach(([answer, count]) => {
-            const bar = document.createElement('div');
+            countSpan.textContent = count;
+            value.classList.add('updated');
+            setTimeout(() => value.classList.remove('updated'), 500);
+        } else {
+            bar = document.createElement('div');
             bar.className = 'bar';
+            bar.setAttribute('data-answer', answer);
 
             const label = document.createElement('div');
             label.className = 'bar-label';
             label.textContent = answer;
 
+            const background = document.createElement('div');
+            background.className = 'bar-background';
+
+
             const value = document.createElement('div');
             value.className = 'bar-value';
-            const width = (count / maxValue) * 100;
-            value.style.width = `${width}%`;
+            if (count === 0 || isNaN(count)) {
+                value.classList.add('transparent-background');
+            } else {
+                value.style.width = `${width}%`;
+            }
 
+            const countSpan = document.createElement('span');
+            countSpan.className = 'bar-count';
+            countSpan.textContent = count;
+
+            if (count === 0 || isNaN(count)) {
+                countSpan.classList.add('hidden');
+            }
+
+            value.appendChild(countSpan);
+            background.appendChild(value);
             bar.appendChild(label);
-            bar.appendChild(value);
+            bar.appendChild(background);
             container.appendChild(bar);
+        }
+    });
+}
+        window.appState.subscribe((key, value) => {
+            if (key === 'results') {
+                updateBarChart();
+            }
         });
-    }
 
-    function getColor(index) {
-        const colors = ['#FF6384', '#36A2EB', '#FFCE56', '#4BC0C0', '#9966FF', '#FF9F40'];
-        return colors[index % colors.length];
-    }
+        addEventListener("DOMContentLoaded", (event) => {
+            window.appState.enableEmojis = true;
+            const chartContainer = document.getElementById('chart-container');
 
-    window.appState.subscribe((key, value) => {
-        if (key === 'results') {
-            window.appState.wordCloudData = calculateWordCloudData(value);
-            updateWordCloud();
-            updateBarChart();
-        }
-    });
+            if (chartContainer) {
+                const initialResults = {};
+                const bars = chartContainer.querySelectorAll('.bar');
+                bars.forEach(bar => {
+                    const answer = bar.getAttribute('data-answer');
+                    const count = parseInt(bar.getAttribute('data-count'));
+                    initialResults[answer] = count;
+                });
 
-    addEventListener("DOMContentLoaded", (event) => {
-        const resultsList = document.getElementById('results-list');
-        if (resultsList) {
-            const initialResults = {};
-            const listItems = resultsList.querySelectorAll('li');
-            listItems.forEach(li => {
-                const answer = li.getAttribute('data-answer');
-                const count = parseInt(li.querySelector('.count').textContent);
-                initialResults[answer] = count;
-            });
+                window.appState.results = initialResults;
 
-            window.appState.results = initialResults;
-            window.appState.wordCloudData = calculateWordCloudData(initialResults);
-
-            updateWordCloud();
-            updateBarChart();
-        }
-    });
-    </script>
+                updateBarChart();
+            }
+        });
+        </script>
 </body>
 </html>

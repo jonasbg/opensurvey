@@ -1,3 +1,4 @@
+
 #wordcloud {
   list-style: none;
   padding-left: 0;
@@ -5,40 +6,44 @@
   flex-wrap: wrap;
   align-items: center;
   justify-content: center;
-  line-height: 2.75rem;
+  line-height: 2em !important;
   width: 100%;
-  max-width: 600px;
+  max-width: 100vw;
   margin: 0 auto;
+  min-height: 4em;
+  max-height: 100vh;
 }
 
 #wordcloud li {
   padding: 0.125rem 0.25rem;
+  margin: 5px;
+  transition: all 0.5s ease-out;
 }
 
 #wordcloud a {
   --size: 4;
-  --color: #4caf50;
+  --color: var(--primary-color);
   color: var(--color);
   font-size: calc(var(--size) * 0.25rem + 0.5rem);
   display: block;
   position: relative;
   text-decoration: none;
-  transition: transform 0.2s ease;
+  transition: transform 0.2s ease, color 0.3s ease;
 }
 
-#wordcloud a[data-weight="1"] { --size: 1; }
-#wordcloud a[data-weight="2"] { --size: 2; }
-#wordcloud a[data-weight="3"] { --size: 3; }
-#wordcloud a[data-weight="4"] { --size: 4; }
-#wordcloud a[data-weight="5"] { --size: 6; }
-#wordcloud a[data-weight="6"] { --size: 8; }
-#wordcloud a[data-weight="7"] { --size: 10; }
-#wordcloud a[data-weight="8"] { --size: 13; }
-#wordcloud a[data-weight="9"] { --size: 16; }
+#wordcloud a[data-weight="1"] { --size: 1; --color: color-mix(in srgb, var(--primary-color) 10%, var(--background-color)); }
+#wordcloud a[data-weight="2"] { --size: 2; --color: color-mix(in srgb, var(--primary-color) 20%, var(--background-color)); }
+#wordcloud a[data-weight="3"] { --size: 3; --color: color-mix(in srgb, var(--primary-color) 30%, var(--background-color)); }
+#wordcloud a[data-weight="4"] { --size: 4; --color: color-mix(in srgb, var(--primary-color) 40%, var(--background-color)); }
+#wordcloud a[data-weight="5"] { --size: 6; --color: color-mix(in srgb, var(--primary-color) 50%, var(--background-color)); }
+#wordcloud a[data-weight="6"] { --size: 8; --color: color-mix(in srgb, var(--primary-color) 60%, var(--background-color)); }
+#wordcloud a[data-weight="7"] { --size: 10; --color: color-mix(in srgb, var(--primary-color) 70%, var(--background-color)); }
+#wordcloud a[data-weight="8"] { --size: 13; --color: color-mix(in srgb, var(--primary-color) 80%, var(--background-color)); }
+#wordcloud a[data-weight="9"] { --size: 16; --color: color-mix(in srgb, var(--primary-color) 90%, var(--background-color)); }
 
-#wordcloud li:nth-child(2n+1) a { --color: #2e7d32; }
-#wordcloud li:nth-child(3n+1) a { --color: #1b5e20; }
-#wordcloud li:nth-child(4n+1) a { --color: #43a047; }
+#wordcloud li:nth-child(3n+1) a { --color: color-mix(in srgb, var(--primary-dark) var(--size) * 10%, var(--background-color)); }
+#wordcloud li:nth-child(3n+2) a { --color: color-mix(in srgb, var(--primary-darker) var(--size) * 10%, var(--background-color)); }
+#wordcloud li:nth-child(3n) a { --color: color-mix(in srgb, var(--primary-light) var(--size) * 10%, var(--background-color)); }
 
 #wordcloud a:hover {
   transform: scale(1.1);
@@ -64,17 +69,56 @@
 
 @media (prefers-reduced-motion) {
   #wordcloud * {
-      transition: none !important;
+    transition: none !important;
   }
 }
 
 /* Responsive design for word cloud */
 @media (max-width: 600px) {
   #wordcloud {
-      line-height: 2.25rem;
+    line-height: 2.25rem;
   }
 
   #wordcloud a {
-      font-size: calc(var(--size) * 0.2rem + 0.5rem);
+    font-size: calc(var(--size) * 0.2rem + 0.5rem);
   }
+}
+
+@keyframes pulse {
+  0% { transform: scale(1); }
+  50% { transform: scale(1.1); }
+  100% { transform: scale(1); }
+}
+
+a.new-word {
+  animation: pulse 0.5s ease-in-out;
+}
+
+@keyframes fadeInScale {
+  0% { opacity: 0; transform: scale(0.3); }
+  100% { opacity: 1; transform: scale(1); }
+}
+
+@keyframes updatePulse {
+  0% { transform: scale(1); }
+  50% { transform: scale(1.5); text-shadow: 0 0 5px rgba(var(--primary-color-rgb), 0.5); }
+  100% { transform: scale(1); }
+}
+
+@keyframes fadeOutScale {
+  0% { opacity: 1; transform: scale(1); }
+  100% { opacity: 0; transform: scale(0.8); }
+}
+
+.cloud {
+  opacity: 0;
+  animation: fadeInScale 0.5s ease-out forwards;
+}
+
+.updating {
+  animation: updatePulse 0.5s ease-in-out;
+}
+
+.removing {
+  animation: fadeOutScale 0.5s ease-in forwards;
 }
