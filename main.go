@@ -191,12 +191,6 @@ func handleUpload(c echo.Context) error {
 		return c.JSON(http.StatusBadRequest, map[string]string{"error": "Invalid config structure"})
 	}
 
-	// Save the new config
-	err = os.WriteFile("config.yaml", []byte(configData), 0644)
-	if err != nil {
-		return c.JSON(http.StatusInternalServerError, map[string]string{"error": "Failed to save config"})
-	}
-
 	// Update the current config
 	config = newConfig
 	currentSlide = -1 // Reset current slide
