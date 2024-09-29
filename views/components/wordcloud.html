@@ -3,90 +3,110 @@
 
 <ul id="wordcloud" class="cloud" role="navigation" aria-label="Word cloud">
     {{range .Results}}
-        <li><a href="#" data-weight="{{.Count}}" data-word="{{.Answer}}">{{.Answer}}</a></li>
+    <li>
+        <a href="#" data-weight="{{.Count}}" data-word="{{.Answer}}">{{.Answer}}</a>
+    </li>
     {{end}}
 </ul>
 
 <script>
-function updateWordCloud() {
-    const wordcloud = document.getElementById('wordcloud');
-    if (!wordcloud) return;
+function randomInt(min, max) {
+    return Math.floor(Math.random() * (max - min + 1)) + min;
+  }
 
-    const wordCloudData = window.appState.wordCloudData;
-    const maxWeight = Math.max(...Object.values(wordCloudData));
-    const currentWords = new Set(Array.from(wordcloud.querySelectorAll('li a')).map(a => a.getAttribute('data-word')));
+  document.addEventListener('DOMContentLoaded', () => {
+    const words = document.querySelectorAll('#wordcloud li');
+    words.forEach(word => {
+      const hue = randomInt(0, 360);
+      word.style.setProperty('--hue', hue);
 
-    for (const [word, weight] of Object.entries(wordCloudData)) {
-        const normalizedWeight = Math.log(weight + 1) / Math.log(maxWeight + 1);
-        const fontSize = 14 + normalizedWeight * 32;
+      // Randomly rotate some words
+      if (Math.random() < 0.6) {  // 60% chance of rotation
+        const rotation = randomInt(-10, 10);
+        word.style.transform = `rotate(${rotation}deg)`;
+      }
+    });
+  });
 
-        let li = wordcloud.querySelector(`li a[data-word="${word}"]`);
-        if (li) {
-            // Word exists, update weight if changed
-            const currentWeight = parseFloat(li.getAttribute('data-weight'));
-            if (weight !== currentWeight) {
+    function updateWordCloud() {
+        const wordcloud = document.getElementById('wordcloud');
+        if (!wordcloud) return;
+
+        const wordCloudData = window.appState.wordCloudData;
+        const maxWeight = Math.max(...Object.values(wordCloudData));
+        const currentWords = new Set(Array.from(wordcloud.querySelectorAll('li a')).map(a => a.getAttribute('data-word')));
+
+        for (const [word, weight] of Object.entries(wordCloudData)) {
+            const normalizedWeight = Math.log(weight + 1) / Math.log(maxWeight + 1);
+            const fontSize = 14 + normalizedWeight * 32;
+
+            let li = wordcloud.querySelector(`li a[data-word="${word}"]`);
+            if (li) {
+                // Word exists, update weight if changed
+                const currentWeight = parseFloat(li.getAttribute('data-weight'));
+                if (weight !== currentWeight) {
+                    li.setAttribute('data-weight', weight);
+                    li.style.fontSize = `${fontSize}px`;
+                    li.parentNode.style.animation = 'updatePulse 1s ease-in-out';
+                    li.parentNode.addEventListener('animationend', () => {
+                        li.parentNode.style.animation = '';
+                    }, { once: true });
+                }
+            } else {
+                // Word doesn't exist, add it
+                li = document.createElement('a');
+                li.href = '#';
+                li.textContent = word;
+                li.setAttribute('data-word', word);
                 li.setAttribute('data-weight', weight);
                 li.style.fontSize = `${fontSize}px`;
-                li.parentNode.style.animation = 'updatePulse 1s ease-in-out';
-                li.parentNode.addEventListener('animationend', () => {
-                    li.parentNode.style.animation = '';
-                }, {once: true});
+
+                const newLi = document.createElement('li');
+                newLi.appendChild(li);
+                newLi.style.animation = 'fadeInScale 1s ease-out-out';
+                wordcloud.appendChild(newLi);
+
+                newLi.addEventListener('animationend', () => {
+                    newLi.style.animation = '';
+                }, { once: true });
             }
-        } else {
-            // Word doesn't exist, add it
-            li = document.createElement('a');
-            li.href = '#';
-            li.textContent = word;
-            li.setAttribute('data-word', word);
-            li.setAttribute('data-weight', weight);
-            li.style.fontSize = `${fontSize}px`;
-
-            const newLi = document.createElement('li');
-            newLi.appendChild(li);
-            newLi.style.animation = 'fadeInScale 1s ease-out-out';
-            wordcloud.appendChild(newLi);
-
-            newLi.addEventListener('animationend', () => {
-                newLi.style.animation = '';
-            }, {once: true});
         }
     }
-}
 
-function calculateWordCloudData(results) {
-    const wordCloudData = {};
-    Object.entries(results).forEach(([answer, count]) => {
-        const words = answer.toLowerCase().split(/\s+/);
-        words.forEach(word => {
-            if (word.length > 0) {
-                wordCloudData[word] = (wordCloudData[word] || 0) + count;
+    function calculateWordCloudData(results) {
+        const wordCloudData = {};
+        Object.entries(results).forEach(([answer, count]) => {
+            const words = answer.toLowerCase().split(/\s+/);
+            words.forEach(word => {
+                if (word.length > 0) {
+                    wordCloudData[word] = (wordCloudData[word] || 0) + count;
+                }
+            });
+        });
+        return wordCloudData;
+    }
+
+    addEventListener("DOMContentLoaded", (event) => {
+        window.appState.subscribe((key, value) => {
+            if (key === 'results') {
+                window.appState.wordCloudData = calculateWordCloudData(value);
+                updateWordCloud();
             }
         });
-    });
-    return wordCloudData;
-}
 
-addEventListener("DOMContentLoaded", (event) => {
-    window.appState.subscribe((key, value) => {
-        if (key === 'results') {
-            window.appState.wordCloudData = calculateWordCloudData(value);
+        const resultsList = document.getElementById('results-list');
+        if (resultsList) {
+            const initialResults = {};
+            const listItems = resultsList.querySelectorAll('li');
+            listItems.forEach(li => {
+                const answer = li.getAttribute('data-answer');
+                const count = parseInt(li.querySelector('.count').textContent);
+                initialResults[answer] = count;
+            });
+
+            window.appState.wordCloudData = calculateWordCloudData(initialResults);
             updateWordCloud();
         }
     });
-
-    const resultsList = document.getElementById('results-list');
-    if (resultsList) {
-        const initialResults = {};
-        const listItems = resultsList.querySelectorAll('li');
-        listItems.forEach(li => {
-            const answer = li.getAttribute('data-answer');
-            const count = parseInt(li.querySelector('.count').textContent);
-            initialResults[answer] = count;
-        });
-
-        window.appState.wordCloudData = calculateWordCloudData(initialResults);
-        updateWordCloud();
-    }
-});
 </script>
 {{end}}
