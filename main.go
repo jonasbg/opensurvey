@@ -84,7 +84,7 @@ func main() {
 
 	go handleMessages()
 
-	e.Logger.Fatal(e.Start(":8000"))
+	e.Logger.Fatal(e.Start(":8080"))
 }
 
 type TemplateRenderer struct {
@@ -278,7 +278,7 @@ func handlePresenter(c echo.Context) error {
 	}
 
 	return c.Render(http.StatusOK, "presenter.html", map[string]interface{}{
-		"Token": config.Token,
+		"Token":      config.Token,
 		"SurveyName": config.Name,
 	})
 }
@@ -311,8 +311,8 @@ func handleSurvey(c echo.Context) error {
 
 	slide := config.Survey[currentSlide]
 	return c.Render(http.StatusOK, "survey.html", map[string]interface{}{
-		"Slide": slide,
-		"Token": token,
+		"Slide":      slide,
+		"Token":      token,
 		"SurveyName": config.Name,
 	})
 }

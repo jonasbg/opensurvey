@@ -1,0 +1,17 @@
+replicaCount: 1
+image:
+  repository: ghcr.io/jonasbg/opensurvey
+  tag: "d553b27"
+  pullPolicy: IfNotPresent
+env:
+  TZ: "Europe/Oslo"
+ingress:
+  enabled: true
+  hostname: example.com
+  tls:
+    enabled: true
+    certResolver: cloudflare
+securityContext:
+  runAsUser: 101
+  runAsGroup: 101
+  fsGroup: 100

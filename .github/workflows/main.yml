@@ -1,4 +1,4 @@
-name: Build and Push Docker image to GHCR
+name: Build and Push Docker image and Helm chart to GHCR
 
 on:
   push:
@@ -11,7 +11,7 @@ env:
   IMAGE_NAME: ${{ github.repository }}
 
 jobs:
-  build-and-push-image:
+  build-and-push:
     runs-on: ubuntu-latest
     permissions:
       contents: read
@@ -41,3 +41,17 @@ jobs:
           push: true
           tags: ${{ steps.meta.outputs.tags }}
           labels: ${{ steps.meta.outputs.labels }}
+
+      - name: Set up Helm
+        uses: azure/setup-helm@v3
+        with:
+          version: v3.12.0
+
+      - name: Package Helm chart
+        run: |
+          helm package .helm
+
+      - name: Push Helm chart to GHCR
+        run: |
+          echo ${{ secrets.GITHUB_TOKEN }} | helm registry login ${{ env.REGISTRY }} -u ${{ github.actor }} --password-stdin
+          helm push *.tgz oci://${{ env.REGISTRY }}/${{ github.repository_owner }}/helm-charts
