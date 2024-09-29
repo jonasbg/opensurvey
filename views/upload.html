@@ -6,6 +6,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Survey App</title>
     <link rel="stylesheet" href="/static/css/base.css">
+    <link rel="stylesheet" href="/static/css/upload.css">
 </head>
 
 <body>
@@ -16,34 +17,26 @@
         <p>or</p>
         <p class="text-lg mt-4">Paste your YAML configuration</p>
     </div>
-    <div id="preview" class="mt-8 hidden">
-        <h2 class="text-2xl font-bold mb-4">Survey Outline</h2>
-        <div id="survey-outline" class="space-y-4"></div>
-        <button id="create-survey" class="mt-6 bg-blue-500 hover:bg-blue-600 text-white font-bold py-2 px-4 rounded">
-            Create Survey
-        </button>
-    </div>
+    <div id="error-message" class="mt-4 text-red-500 hidden"></div>
 </main>
 
 <script src="https://unpkg.com/htmx.org@1.9.4"></script>
 <script>
     const dropzone = document.getElementById('dropzone');
-    const preview = document.getElementById('preview');
-    const surveyOutline = document.getElementById('survey-outline');
-    const createButton = document.getElementById('create-survey');
+    const errorMessage = document.getElementById('error-message');
 
     dropzone.addEventListener('dragover', (e) => {
         e.preventDefault();
-        dropzone.classList.add('border-blue-500');
+        dropzone.style.borderColor = '#3490dc';
     });
 
     dropzone.addEventListener('dragleave', () => {
-        dropzone.classList.remove('border-blue-500');
+        dropzone.style.borderColor = '#ccc';
     });
 
     dropzone.addEventListener('drop', (e) => {
         e.preventDefault();
-        dropzone.classList.remove('border-blue-500');
+        dropzone.style.borderColor = '#ccc';
         const file = e.dataTransfer.files[0];
         uploadFile(file);
     });
@@ -59,27 +52,41 @@
         const formData = new FormData();
         formData.append('file', file);
         htmx.ajax('POST', '/upload', {
-            target: '#survey-outline',
+            target: '#error-message',
             swap: 'innerHTML',
             values: formData
-        }).then(showPreview);
+        });
     }
 
     function uploadConfig(config) {
         htmx.ajax('POST', '/upload', {
-            target: '#survey-outline',
+            target: '#error-message',
             swap: 'innerHTML',
             values: { config: config }
-        }).then(showPreview);
+        });
     }
 
-    function showPreview() {
-        preview.classList.remove('hidden');
-    }
-
-    createButton.addEventListener('click', () => {
-        window.location.href = '/';
+    document.body.addEventListener('htmx:afterOnLoad', function(event) {
+        if (event.detail.successful) {
+            try {
+                const response = JSON.parse(event.detail.xhr.response);
+                if (response.redirect) {
+                    window.location.href = response.redirect;
+                } else {
+                    showError('Unexpected server response');
+                }
+            } catch (error) {
+                showError('Error parsing server response');
+            }
+        } else {
+            showError(event.detail.xhr.response || 'An error occurred during upload.');
+        }
     });
+
+    function showError(message) {
+        errorMessage.textContent = message;
+        errorMessage.classList.remove('hidden');
+    }
 </script>
 </body>
 

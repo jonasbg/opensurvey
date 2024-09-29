@@ -156,6 +156,8 @@ func handleUploadPage(c echo.Context) error {
 	return c.Render(http.StatusOK, "upload.html", nil)
 }
 
+// main.go
+
 func handleUpload(c echo.Context) error {
 	configData := c.FormValue("config")
 
@@ -199,10 +201,22 @@ func handleUpload(c echo.Context) error {
 	config = newConfig
 	currentSlide = -1 // Reset current slide
 
-	// Return the survey outline
-	return c.JSON(http.StatusOK, map[string]interface{}{
-		"message": "Config uploaded successfully",
-		"survey":  config.Survey,
+	// Create a new cookie with the secret token
+	cookie := new(http.Cookie)
+	cookie.Name = userIDCookieName
+	cookie.Value = config.Secret
+	cookie.HttpOnly = true
+	cookie.Secure = c.Request().TLS != nil
+	cookie.SameSite = http.SameSiteStrictMode
+	cookie.Path = "/"
+
+	// Set the cookie
+	c.SetCookie(cookie)
+
+	// Return a JSON response indicating success and the redirect URL
+	return c.JSON(http.StatusOK, map[string]string{
+		"message":  "Config uploaded successfully",
+		"redirect": "/presenter",
 	})
 }
 
