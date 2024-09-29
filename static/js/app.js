@@ -26,11 +26,11 @@
         }
     };
 
-    window.sendEmoji = function(emoji) {
+    window.sendEmoji = function (emoji) {
         if (socket && socket.readyState === WebSocket.OPEN) {
             const emojiId = createFloatingEmoji(emoji);
             if (emojiId) {
-                socket.send(JSON.stringify({type: "emoji", payload: emojiId}));
+                socket.send(JSON.stringify({ type: "emoji", payload: emojiId }));
             }
         }
     };
@@ -160,8 +160,8 @@
 
         // Check if the emoji already exists in the DOM
         if (document.querySelector(`[data-emoji-id="${emojiId}"]`)) {
-          console.log(`Emoji with ID ${emojiId} already exists. Skipping creation.`);
-          return null;
+            console.log(`Emoji with ID ${emojiId} already exists. Skipping creation.`);
+            return null;
         }
 
         const emojiElement = document.createElement('div');
@@ -183,58 +183,61 @@
 
         // Remove the emoji after the animation completes
         setTimeout(() => {
-          emojiElement.remove();
+            emojiElement.remove();
         }, (duration + delay) * 1000);
 
         // Explosion effect
         emojiElement.addEventListener('click', (e) => {
-          e.stopPropagation();
-          explodeEmoji(emojiElement);
-          sendEmojiPoppedMessage(emojiId);
+            e.stopPropagation();
+            explodeEmoji(emojiElement);
+            sendEmojiPoppedMessage(emojiId);
         });
 
         // Touch support for mobile devices
         emojiElement.addEventListener('touchstart', (e) => {
-          e.preventDefault();
-          explodeEmoji(emojiElement);
-          sendEmojiPoppedMessage(emojiId);
+            e.preventDefault();
+            explodeEmoji(emojiElement);
+            sendEmojiPoppedMessage(emojiId);
+            if ('vibrate' in navigator) {
+                navigator.vibrate(55); // Vibrate for 100ms
+            }
         });
 
         return emojiId;
-      }
+    }
 
-      function explodeEmoji(emojiElement) {
+    function explodeEmoji(emojiElement) {
         const explosionPieces = 8;
         const rect = emojiElement.getBoundingClientRect();
         const centerX = rect.left + rect.width / 2;
         const centerY = rect.top + rect.height / 2;
 
         for (let i = 0; i < explosionPieces; i++) {
-          const piece = document.createElement('div');
-          piece.textContent = emojiElement.textContent;
-          piece.style.position = 'fixed';
-          piece.style.fontSize = '1em';
-          piece.style.left = centerX + 'px';
-          piece.style.top = centerY + 'px';
-          piece.style.zIndex = 1001;
-          document.body.appendChild(piece);
+            const piece = document.createElement('div');
+            piece.textContent = emojiElement.textContent;
+            piece.style.position = 'fixed';
+            piece.style.fontSize = '1em';
+            piece.style.left = centerX + 'px';
+            piece.style.top = centerY + 'px';
+            piece.style.zIndex = 1001;
+            document.body.appendChild(piece);
 
-          const angle = (i / explosionPieces) * 2 * Math.PI;
-          const velocity = 5 + Math.random() * 5;
-          const dx = Math.cos(angle) * velocity;
-          const dy = Math.sin(angle) * velocity;
+            const angle = (i / explosionPieces) * 2 * Math.PI;
+            const velocity = 5 + Math.random() * 5;
+            const dx = Math.cos(angle) * velocity;
+            const dy = Math.sin(angle) * velocity;
 
-          piece.animate([
-            { transform: 'translate(0, 0) scale(1)', opacity: 1 },
-            { transform: `translate(${dx * 20}px, ${dy * 20}px) scale(0)`, opacity: 0 }
-          ], {
-            duration: 1000,
-            easing: 'ease-out'
-          }).onfinish = () => piece.remove();
+            piece.animate([
+                { transform: 'translate(0, 0) scale(1)', opacity: 1 },
+                { transform: `translate(${dx * 20}px, ${dy * 20}px) scale(0)`, opacity: 0 }
+            ], {
+                duration: 1000,
+                easing: 'ease-out'
+            }).onfinish = () => piece.remove();
         }
 
         emojiElement.remove();
-      }
+    }
 
     // Send emoji event
     window.sendEmoji = function (emoji) {
