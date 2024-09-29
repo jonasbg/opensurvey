@@ -61,6 +61,7 @@ func main() {
 	e := echo.New()
 	e.Use(middleware.Logger())
 	e.Use(middleware.Recover())
+	e.HTTPErrorHandler = customErrorHandler
 
 	e.Static("/static", "static")
 
@@ -192,8 +193,8 @@ func handleUpload(c echo.Context) error {
 	}
 
 	// Update the current config
+	resetGlobals()
 	config = newConfig
-	currentSlide = -1 // Reset current slide
 
 	// Create a new cookie with the secret token
 	cookie := new(http.Cookie)
@@ -431,15 +432,31 @@ func handleResults(c echo.Context) error {
 	}, len(config.Survey[currentSlide].Answers))
 
 	// Populate the orderedResults slice
-	for i, answer := range config.Survey[currentSlide].Answers {
-		count := 0
-		if val, exists := results[answer]; exists {
-			count = val
+	if config.Survey[currentSlide].Type == "text" {
+		// For text responses, we'll return the raw results
+		for answer, count := range results {
+			orderedResults = append(orderedResults, struct {
+				Answer string
+				Count  int
+			}{Answer: answer, Count: count})
 		}
-		orderedResults[i] = struct {
+	} else {
+		// For non-text responses, keep the original logic
+		orderedResults = make([]struct {
 			Answer string
 			Count  int
-		}{Answer: answer, Count: count}
+		}, len(config.Survey[currentSlide].Answers))
+
+		for i, answer := range config.Survey[currentSlide].Answers {
+			count := 0
+			if val, exists := results[answer]; exists {
+				count = val
+			}
+			orderedResults[i] = struct {
+				Answer string
+				Count  int
+			}{Answer: answer, Count: count}
+		}
 	}
 
 	return c.Render(http.StatusOK, "results.html", map[string]interface{}{
@@ -520,5 +537,25 @@ func handleMessages() {
 			}
 			return true
 		})
+	}
+}
+
+func resetGlobals() {
+	currentSlide = -1
+	answers = sync.Map{}
+	clients = sync.Map{}
+	userResponses = sync.Map{}
+	atomic.StoreInt32(&clientCount, 0)
+	close(broadcast)
+	broadcast = make(chan Message, 100)
+}
+
+func customErrorHandler(err error, c echo.Context) {
+	code := http.StatusInternalServerError
+	if he, ok := err.(*echo.HTTPError); ok {
+		code = he.Code
+	}
+	if code != http.StatusOK {
+		c.Redirect(http.StatusFound, "/")
 	}
 }
