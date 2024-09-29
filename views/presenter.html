@@ -7,7 +7,7 @@
   <title>Presenter View - Survey App</title>
   <link rel="stylesheet" href="/static/css/base.css">
   <script src="https://unpkg.com/htmx.org@1.9.10"></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/easyqrcodejs@4.4.13/dist/easy.qrcode.min.js"></script>
   <style>
     body,
     html {
@@ -78,6 +78,14 @@
       height: 100%;
       z-index: 1000;
     }
+
+    #qrcode svg path {
+    shape-rendering: geometricPrecision;
+  }
+  #qrcode svg rect {
+    rx: 2px;
+    ry: 2px;
+  }
   </style>
 </head>
 
@@ -100,8 +108,11 @@
       <p>Everyone is waiting for your next move.</p>
       <button id="startSurveyBtn" hx-get="/nextSlide" hx-trigger="click" hx-swap="none">Start Survey</button>
       <div>
-        <div id="qrcode" style="margin-top: 20px; display: flex; justify-content: center;"></div>      </div>
-      <div>
+        <div class="qr-container">
+          <div id="qrcode"></div>
+          <p id="surveyUrl"></p>
+        </div>
+        <div>
         <div class="user-info">
           <svg xmlns="http://www.w3.org/2000/svg" width="2em" height="2em" viewBox="0 0 20 20">
             <path fill="currentColor"
@@ -184,17 +195,33 @@
         window.location.reload();
       }, 1000);
     };
+    const surveyUrl = `${window.location.origin}/survey/${token}`;
 
-      const surveyUrl = `${window.location.origin}/survey/${token}`;
+    new QRCode(document.getElementById("qrcode"), {
+    text: surveyUrl,
+    width: 256,
+    height: 256,
+    colorDark: "#2e7d32",
+    colorLight: "#e8f5e9",
+    correctLevel: QRCode.CorrectLevel.H,
+    dotScale: 0.7, // This makes the dots smaller, creating space between them
+    dotScaleTiming: 0.7, // Apply to timing pattern
+    dotScaleA: 0.7, // Apply to alignment pattern
+    quietZone: 15,
+    quietZoneColor: "#e8f5e9",
+    // logo: "/static/img/logo.png", // Replace with your logo path if you have one
+    logoBackgroundTransparent: true,
+    drawer: 'svg', // Use SVG for better quality
+    onRenderingEnd: function(options, dataURL) {
+      const qrSvg = document.querySelector("#qrcode svg");
+      if (qrSvg) {
+        qrSvg.style.display = "block";
+        qrSvg.style.margin = "0 auto";
+      }
+    }
+  });
 
-      new QRCode(document.getElementById("qrcode"), {
-        text: surveyUrl,
-        width: 200,
-        height: 200,
-        colorDark: "#2e7d32",
-        colorLight: "#e8f5e9",
-        correctLevel: QRCode.CorrectLevel.L
-      });
+  document.getElementById("surveyUrl").textContent = surveyUrl;
   </script>
 </body>
 
