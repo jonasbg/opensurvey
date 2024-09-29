@@ -279,6 +279,7 @@ func handlePresenter(c echo.Context) error {
 
 	return c.Render(http.StatusOK, "presenter.html", map[string]interface{}{
 		"Token": config.Token,
+		"SurveyName": config.Name,
 	})
 }
 
@@ -312,6 +313,7 @@ func handleSurvey(c echo.Context) error {
 	return c.Render(http.StatusOK, "survey.html", map[string]interface{}{
 		"Slide": slide,
 		"Token": token,
+		"SurveyName": config.Name,
 	})
 }
 
