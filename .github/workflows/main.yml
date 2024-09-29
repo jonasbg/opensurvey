@@ -34,33 +34,53 @@ jobs:
         with:
           images: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}
 
-      - name: Extract digest
-        id: digest
-        run: echo "digest=$(docker inspect --format='{{index .RepoDigests 0}}' ${{ steps.meta.outputs.tags }} | cut -d'@' -f2)" >> $GITHUB_OUTPUT
+      - name: Set up QEMU
+        uses: docker/setup-qemu-action@v2
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v2
 
       - name: Build and push Docker image
         uses: docker/build-push-action@v4
+        id: build-and-push
         with:
           context: .
+          platforms: linux/amd64,linux/arm64
           push: true
           tags: ${{ steps.meta.outputs.tags }}
           labels: ${{ steps.meta.outputs.labels }}
+
+      - name: Extract digest
+        run: echo "DIGEST=$(echo '${{ steps.build-and-push.outputs.digest }}' | cut -d':' -f2)" >> $GITHUB_ENV
 
       - name: Set up Helm
         uses: azure/setup-helm@v3
         with:
           version: v3.12.0
 
+      - name: Get latest Helm chart version
+        id: get-latest-version
+        run: |
+          latest_version=$(helm registry list oci://${{ env.REGISTRY }}/${{ github.repository_owner }}/helm-charts | grep -oP '(?<=:)[\d\.]+' | sort -V | tail -n 1)
+          echo "LATEST_VERSION=${latest_version:-0.0.0}" >> $GITHUB_ENV
+
+      - name: Increment Helm chart version
+        run: |
+          IFS='.' read -ra ADDR <<< "$LATEST_VERSION"
+          ((ADDR[2]++))
+          NEW_VERSION="${ADDR[0]}.${ADDR[1]}.${ADDR[2]}"
+          echo "NEW_VERSION=$NEW_VERSION" >> $GITHUB_ENV
+
       - name: Update Helm values.yaml
         run: |
           sed -i 's|${REGISTRY}|${{ env.REGISTRY }}|g' .helm/values.yaml
           sed -i 's|${IMAGE_NAME}|${{ env.IMAGE_NAME }}|g' .helm/values.yaml
           sed -i 's|${IMAGE_TAG}|${{ steps.meta.outputs.version }}|g' .helm/values.yaml
-          sed -i 's|${IMAGE_DIGEST}|${{ steps.digest.outputs.digest }}|g' .helm/values.yaml
+          sed -i 's|${IMAGE_DIGEST}|${{ env.DIGEST }}|g' .helm/values.yaml
 
       - name: Package Helm chart
         run: |
-          helm package .helm --app-version ${{ steps.meta.outputs.version }}
+          helm package .helm --version ${{ env.NEW_VERSION }} --app-version ${{ steps.meta.outputs.version }}
 
       - name: Push Helm chart to GHCR
         run: |
