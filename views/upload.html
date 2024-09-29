@@ -1,0 +1,86 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Survey App</title>
+    <link rel="stylesheet" href="/static/css/base.css">
+</head>
+
+<body>
+<main class="container mx-auto px-4 py-8">
+    <h1 class="text-3xl font-bold mb-6">Upload Survey Configuration</h1>
+    <div id="dropzone" class="border-4 border-dashed border-gray-300 rounded-lg p-8 text-center cursor-pointer hover:border-gray-400 transition duration-300">
+        <p class="text-lg mb-4">Drag and drop your config.yaml file here</p>
+        <p>or</p>
+        <p class="text-lg mt-4">Paste your YAML configuration</p>
+    </div>
+    <div id="preview" class="mt-8 hidden">
+        <h2 class="text-2xl font-bold mb-4">Survey Outline</h2>
+        <div id="survey-outline" class="space-y-4"></div>
+        <button id="create-survey" class="mt-6 bg-blue-500 hover:bg-blue-600 text-white font-bold py-2 px-4 rounded">
+            Create Survey
+        </button>
+    </div>
+</main>
+
+<script src="https://unpkg.com/htmx.org@1.9.4"></script>
+<script>
+    const dropzone = document.getElementById('dropzone');
+    const preview = document.getElementById('preview');
+    const surveyOutline = document.getElementById('survey-outline');
+    const createButton = document.getElementById('create-survey');
+
+    dropzone.addEventListener('dragover', (e) => {
+        e.preventDefault();
+        dropzone.classList.add('border-blue-500');
+    });
+
+    dropzone.addEventListener('dragleave', () => {
+        dropzone.classList.remove('border-blue-500');
+    });
+
+    dropzone.addEventListener('drop', (e) => {
+        e.preventDefault();
+        dropzone.classList.remove('border-blue-500');
+        const file = e.dataTransfer.files[0];
+        uploadFile(file);
+    });
+
+    document.addEventListener('paste', (e) => {
+        const pastedText = e.clipboardData.getData('text');
+        if (pastedText) {
+            uploadConfig(pastedText);
+        }
+    });
+
+    function uploadFile(file) {
+        const formData = new FormData();
+        formData.append('file', file);
+        htmx.ajax('POST', '/upload', {
+            target: '#survey-outline',
+            swap: 'innerHTML',
+            values: formData
+        }).then(showPreview);
+    }
+
+    function uploadConfig(config) {
+        htmx.ajax('POST', '/upload', {
+            target: '#survey-outline',
+            swap: 'innerHTML',
+            values: { config: config }
+        }).then(showPreview);
+    }
+
+    function showPreview() {
+        preview.classList.remove('hidden');
+    }
+
+    createButton.addEventListener('click', () => {
+        window.location.href = '/';
+    });
+</script>
+</body>
+
+</html>

@@ -1,5 +1,5 @@
 name: "My survey"
-token: "token"
+token: "hello"
 secret: "presenterSecret"
 survey:
   - type: "text"

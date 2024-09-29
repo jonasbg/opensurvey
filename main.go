@@ -75,9 +75,12 @@ func main() {
 	e.POST("/submit/:token", handleSubmit)
 	e.GET("/results/:token", handleResults)
 	e.GET("/completed/:token", handleCompleted)
-	e.GET("/presenter", handlePresenter)
 	e.GET("/ws", handleWebSocket)
 	e.GET("/nextSlide", handleNextSlide)
+
+	e.GET("/presenter", handlePresenter)
+	e.GET("/upload", handleUploadPage)
+	e.POST("/upload", handleUpload)
 
 	go handleMessages()
 
@@ -95,12 +98,15 @@ func (t *TemplateRenderer) Render(w io.Writer, name string, data interface{}, c 
 func loadConfig(filename string) {
 	data, err := os.ReadFile(filename)
 	if err != nil {
-		log.Fatalf("Error reading config file: %v", err)
+		log.Printf("Error reading config file: %v", err)
+		config = Config{} // Initialize empty config
+		return
 	}
 
 	err = yaml.Unmarshal(data, &config)
 	if err != nil {
-		log.Fatalf("Error parsing config file: %v", err)
+		log.Printf("Error parsing config file: %v", err)
+		config = Config{} // Initialize empty config
 	}
 }
 
@@ -140,7 +146,64 @@ func getUserID(c echo.Context) (string, error) {
 }
 
 func handleIndex(c echo.Context) error {
+	if len(config.Survey) == 0 {
+		return c.Redirect(http.StatusSeeOther, "/upload")
+	}
 	return c.Render(http.StatusOK, "index.html", nil)
+}
+
+func handleUploadPage(c echo.Context) error {
+	return c.Render(http.StatusOK, "upload.html", nil)
+}
+
+func handleUpload(c echo.Context) error {
+	configData := c.FormValue("config")
+
+	if configData == "" {
+		file, err := c.FormFile("file")
+		if err != nil {
+			return c.JSON(http.StatusBadRequest, map[string]string{"error": "No config data provided"})
+		}
+
+		src, err := file.Open()
+		if err != nil {
+			return c.JSON(http.StatusInternalServerError, map[string]string{"error": "Failed to open uploaded file"})
+		}
+		defer src.Close()
+
+		configBytes, err := io.ReadAll(src)
+		if err != nil {
+			return c.JSON(http.StatusInternalServerError, map[string]string{"error": "Failed to read uploaded file"})
+		}
+		configData = string(configBytes)
+	}
+
+	var newConfig Config
+	err := yaml.Unmarshal([]byte(configData), &newConfig)
+	if err != nil {
+		return c.JSON(http.StatusBadRequest, map[string]string{"error": "Invalid YAML format"})
+	}
+
+	// Validate the config structure
+	if newConfig.Name == "" || newConfig.Token == "" || newConfig.Secret == "" || len(newConfig.Survey) == 0 {
+		return c.JSON(http.StatusBadRequest, map[string]string{"error": "Invalid config structure"})
+	}
+
+	// Save the new config
+	err = os.WriteFile("config.yaml", []byte(configData), 0644)
+	if err != nil {
+		return c.JSON(http.StatusInternalServerError, map[string]string{"error": "Failed to save config"})
+	}
+
+	// Update the current config
+	config = newConfig
+	currentSlide = -1 // Reset current slide
+
+	// Return the survey outline
+	return c.JSON(http.StatusOK, map[string]interface{}{
+		"message": "Config uploaded successfully",
+		"survey":  config.Survey,
+	})
 }
 
 func handleToken(c echo.Context) error {
