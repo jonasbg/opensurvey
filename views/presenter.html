@@ -71,6 +71,29 @@
     rx: 3px;
     ry: 3px;
   }
+
+  .token-display {
+      font-size: 2rem;
+      font-weight: bold;
+      background-color: #f0f0f0;
+      border: 2px solid #ccc;
+      border-radius: 8px;
+      padding: 10px 20px;
+      margin-top: 1rem;
+      display: inline-block;
+      min-width: 200px;
+      text-align: center;
+      box-shadow: inset 0 1px 3px rgba(0,0,0,0.1);
+      color: #333;
+      letter-spacing: 2px;
+    }
+
+    .token-label {
+      display: block;
+      font-size: 1rem;
+      /* color: #666; */
+      margin-bottom: 0.5rem;
+    }
   </style>
 </head>
 
@@ -106,7 +129,7 @@
 
         <div class="cell">
           <div id="qrcode"></div>
-          <div class="token">{{.Token}}</div>
+          <div class="token-display">{{.Token}}</div>
         </div>
       </div>
     </div>
