@@ -61,14 +61,15 @@ jobs:
       - name: Get latest Helm chart version
         id: get-latest-version
         run: |
-          latest_version=$(helm registry list oci://${{ env.REGISTRY }}/${{ github.repository_owner }}/helm-charts | grep -oP '(?<=:)[\d\.]+' | sort -V | tail -n 1)
-          echo "LATEST_VERSION=${latest_version:-0.0.0}" >> $GITHUB_ENV
+          echo ${{ secrets.GITHUB_TOKEN }} | helm registry login ${{ env.REGISTRY }} -u ${{ github.actor }} --password-stdin
+          latest_version=$(helm registry list oci://${{ env.REGISTRY }}/${{ github.repository_owner }}/helm-charts 2>/dev/null | sort -V | tail -n 1 || echo "0.0.0")
+          echo "LATEST_VERSION=${latest_version}" >> $GITHUB_ENV
 
       - name: Increment Helm chart version
         run: |
           IFS='.' read -ra ADDR <<< "$LATEST_VERSION"
-          ((ADDR[2]++))
-          NEW_VERSION="${ADDR[0]}.${ADDR[1]}.${ADDR[2]}"
+          ADDR[2]=$((${ADDR[2]:-0}+1))
+          NEW_VERSION="${ADDR[0]:-0}.${ADDR[1]:-0}.${ADDR[2]}"
           echo "NEW_VERSION=$NEW_VERSION" >> $GITHUB_ENV
 
       - name: Update Helm values.yaml
