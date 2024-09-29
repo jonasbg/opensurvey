@@ -112,6 +112,15 @@
     </div>
   </div>
 
+  <script type="module">
+    import { createFloatingEmoji, explodeEmoji } from '/static/js/emoji.js';
+
+    // Make createFloatingEmoji and explodeEmoji available globally
+    window.createFloatingEmoji = createFloatingEmoji;
+    window.explodeEmoji = explodeEmoji;
+  </script>
+
+
   <script>
     let timeout;
     const navbar = document.getElementById('navbar');
@@ -166,8 +175,16 @@
       } else if (message.type === "newSlide") {
         loadSlide(message.payload);
       } else if (message.type === "finished") {
-        window.location.href = `/completed/${token}`
-      }
+                window.location.href = `/completed/${token}`;
+            } else if (message.type === "emoji") {
+                    const [emoji, id] = message.payload.split(';');
+                    createFloatingEmoji(emoji, message.payload);
+            } else if (message.type === "emojiPopped") {
+                const emojiToRemove = document.querySelector(`[data-emoji-id="${message.payload}"]`);
+                if (emojiToRemove) {
+                    explodeEmoji(emojiToRemove);
+                }
+            }
     };
 
     document.addEventListener('keydown', function (event) {
@@ -209,7 +226,10 @@
     }
   });
 
-  document.getElementById("surveyUrl").textContent = surveyUrl;
+  window.document.onload = function(e){
+    document.getElementById("surveyUrl").textContent = surveyUrl;
+  }
+
   </script>
 </body>
 
