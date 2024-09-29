@@ -42,7 +42,8 @@
     }
 
     function connectWebSocket() {
-        socket = new WebSocket(`ws://${window.location.host}/ws`);
+        const protocol = window.location.protocol === 'https:' ? 'wss:' : 'ws:';
+        socket = new WebSocket(`${protocol}//${window.location.host}/ws`);
 
         socket.onmessage = function (event) {
             const message = JSON.parse(event.data);
