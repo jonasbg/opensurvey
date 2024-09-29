@@ -543,11 +543,11 @@ func handleMessages() {
 func resetGlobals() {
 	currentSlide = -1
 	answers = sync.Map{}
-	clients = sync.Map{}
+	// clients = sync.Map{}
 	userResponses = sync.Map{}
-	atomic.StoreInt32(&clientCount, 0)
-	close(broadcast)
-	broadcast = make(chan Message, 100)
+	// atomic.StoreInt32(&clientCount, 0)
+	// close(broadcast)
+	// broadcast = make(chan Message, 100)
 }
 
 func customErrorHandler(err error, c echo.Context) {
