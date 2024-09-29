@@ -541,13 +541,20 @@ func handleMessages() {
 }
 
 func resetGlobals() {
+	broadcast <- Message{Type: "shutdown", Payload: "Server is restarting"}
+
+	// Wait for a short period to allow clients to disconnect
+	time.Sleep(1 * time.Second)
+
 	currentSlide = -1
 	answers = sync.Map{}
-	// clients = sync.Map{}
+	clients = sync.Map{}
 	userResponses = sync.Map{}
-	// atomic.StoreInt32(&clientCount, 0)
+	atomic.StoreInt32(&clientCount, 0)
 	// close(broadcast)
-	// broadcast = make(chan Message, 100)
+	for len(broadcast) > 0 {
+		<-broadcast
+}
 }
 
 func customErrorHandler(err error, c echo.Context) {

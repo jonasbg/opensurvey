@@ -73,6 +73,8 @@
                 if (emojiToRemove) {
                     explodeEmoji(emojiToRemove);
                 }
+            } else if (message.type === "shutdown") {
+                window.location.href = "/"
             }
         };
 
