@@ -6,6 +6,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Presenter View - Survey App</title>
   <link rel="stylesheet" href="/static/css/base.css">
+  <link rel="stylesheet" href="/static/css/presenter.css">
   <script src="https://unpkg.com/htmx.org@1.9.10"></script>
   <script src="https://cdn.jsdelivr.net/npm/easyqrcodejs@4.4.13/dist/easy.qrcode.min.js"></script>
   <style>
@@ -50,24 +51,8 @@
       padding-top: 50px;
     }
 
-    .user-info {
-      position: relative;
-      display: inline-block;
-    }
-
     .user-info svg {
       display: block;
-    }
-
-    .user-count {
-      position: absolute;
-      top: 50%;
-      left: 100%;
-      transform: translateY(-50%);
-      margin-left: 0.5em;
-      font-size: 1em;
-      white-space: nowrap;
-      height: min-content !important;
     }
 
     .overlay {
@@ -83,8 +68,8 @@
     shape-rendering: geometricPrecision;
   }
   #qrcode svg rect {
-    rx: 2px;
-    ry: 2px;
+    rx: 3px;
+    ry: 3px;
   }
   </style>
 </head>
@@ -103,22 +88,25 @@
   </div>
 
   <div id="content">
-    <div class="start-slide">
-      <h1>Hi Presenter!</h1>
-      <p>Everyone is waiting for your next move.</p>
-      <button id="startSurveyBtn" hx-get="/nextSlide" hx-trigger="click" hx-swap="none">Start Survey</button>
-      <div>
-        <div class="qr-container">
-          <div id="qrcode"></div>
-          <p id="surveyUrl"></p>
+    <div class="container">
+      <h1 class="title">Survey Presenter View</h1>
+
+      <div class="content">
+        <div class="cell">
+          <div class="user-count-container">
+            <svg xmlns="http://www.w3.org/2000/svg" width="4em" height="4em" viewBox="0 0 20 20">
+              <path fill="currentColor" d="M10 9a3 3 0 1 0 0-6a3 3 0 0 0 0 6M6 8a2 2 0 1 1-4 0a2 2 0 0 1 4 0m-4.51 7.326a.78.78 0 0 1-.358-.442a3 3 0 0 1 4.308-3.516a6.48 6.48 0 0 0-1.905 3.959q-.034.335.025.654a5 5 0 0 1-2.07-.655m14.95.654a5 5 0 0 0 2.07-.654a.78.78 0 0 0 .357-.442a3 3 0 0 0-4.308-3.517a6.48 6.48 0 0 1 1.907 3.96a2.3 2.3 0 0 1-.026.654M18 8a2 2 0 1 1-4 0a2 2 0 0 1 4 0M5.304 16.19a.84.84 0 0 1-.277-.71a5 5 0 0 1 9.947 0a.84.84 0 0 1-.277.71A6.98 6.98 0 0 1 10 18a6.97 6.97 0 0 1-4.696-1.81" />
+            </svg>
+            <div class="user-count">0</div>
+          </div>
+          <button id="startSurveyBtn" class="start-button" hx-get="/nextSlide" hx-trigger="click" hx-swap="none">Start Now</button>
         </div>
-        <div>
-        <div class="user-info">
-          <svg xmlns="http://www.w3.org/2000/svg" width="2em" height="2em" viewBox="0 0 20 20">
-            <path fill="currentColor"
-              d="M10 9a3 3 0 1 0 0-6a3 3 0 0 0 0 6M6 8a2 2 0 1 1-4 0a2 2 0 0 1 4 0m-4.51 7.326a.78.78 0 0 1-.358-.442a3 3 0 0 1 4.308-3.516a6.48 6.48 0 0 0-1.905 3.959q-.034.335.025.654a5 5 0 0 1-2.07-.655m14.95.654a5 5 0 0 0 2.07-.654a.78.78 0 0 0 .357-.442a3 3 0 0 0-4.308-3.517a6.48 6.48 0 0 1 1.907 3.96a2.3 2.3 0 0 1-.026.654M18 8a2 2 0 1 1-4 0a2 2 0 0 1 4 0M5.304 16.19a.84.84 0 0 1-.277-.71a5 5 0 0 1 9.947 0a.84.84 0 0 1-.277.71A6.98 6.98 0 0 1 10 18a6.97 6.97 0 0 1-4.696-1.81" />
-          </svg> </span>
-          <span class="user-count">0</span>
+
+        <div class="divider"></div>
+
+        <div class="cell">
+          <div id="qrcode"></div>
+          <div class="token">{{.Token}}</div>
         </div>
       </div>
     </div>
