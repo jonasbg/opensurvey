@@ -16,6 +16,8 @@ FROM scratch
 WORKDIR /app
 
 COPY --from=builder /app/main .
+COPY --from=builder /app/views /app/views
+COPY --from=builder /app/static /app/static
 
 EXPOSE 8080
 
