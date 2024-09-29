@@ -1,57 +1,87 @@
 #chart-container {
-  width: 100%;
+  min-width: 50vw;
   max-width: 600px;
   margin: 0 auto;
+  padding: 20px;
+  box-sizing: border-box;
 }
 
 .bar-chart {
-  display: grid;
-  grid-template-columns: minmax(100px, 1fr) 2fr;
-  gap: 10px;
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
 }
 
 .bar {
-  display: contents;
-}
-
-.bar-label {
-  text-align: right;
-  padding-right: 10px;
-  font-size: 1em;
-  white-space: nowrap;
+  height: 60px;
+  background-color: rgba(52, 152, 219, 0.2);
+  border-radius: 30px;
   overflow: hidden;
-  text-overflow: ellipsis;
+  position: relative;
 }
 
 .bar-background {
-  background-color: rgba(76, 175, 80, 0.2);
-  height: 30px;
-  border-radius: 5px;
+  width: 100%;
+  height: 100%;
 }
 
 .bar-value {
-  background-color: #4CAF50;
   height: 100%;
-  transition: width 0.5s ease-in-out, background-color 0.5s ease-in-out;
-  border-radius: 5px;
+  background-color: #3498db;
+  border-radius: 30px;
+  transition: width 0.5s ease-in-out;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 20px;
+  box-sizing: border-box;
 }
 
-@keyframes fadeIn {
-  from { opacity: 0; }
-  to { opacity: 1; }
+.bar-label {
+  color: white;
+  font-family: Arial, sans-serif;
+  font-weight: bold;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+  max-width: calc(100% - 50px);
+  margin-bottom: 0;
 }
 
-@keyframes scaleIn {
-  from { transform: scale(0.9); }
-  to { transform: scale(1); }
+.bar-count {
+  color: white;
+  font-family: Arial, sans-serif;
+  font-weight: bold;
+  background-color: rgba(0, 0, 0, 0.3);
+  border-radius: 50%;
+  width: 40px;
+  height: 40px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-bottom: 0;
 }
 
-#wordcloud li {
-  animation: fadeIn 0.5s ease-out, scaleIn 0.5s ease-out;
+.hidden {
+  display: none;
 }
 
-.bar-value.updated {
-  animation: pulse 0.5s ease-in-out;
+.transparent-background{
+  background-color: #3498db00;
+}
+
+@media (max-width: 480px) {
+  .bar {
+      height: 45px;
+  }
+
+  .bar-label, .bar-count {
+      font-size: 12px;
+  }
+
+  .bar-count {
+      width: 30px;
+      height: 30px;
+  }
 }
 
 @keyframes pulse {
@@ -60,17 +90,6 @@
   100% { transform: scale(1); }
 }
 
-@media (max-width: 600px) {
-  .bar-chart {
-    grid-template-columns: 1fr;
-  }
-
-  .bar-label {
-    text-align: left;
-    padding-left: 5px;
-  }
-
-  .bar-background {
-    height: 25px;
-  }
+.bar-value.updated {
+  animation: pulse 0.5s ease-in-out;
 }
