@@ -68,12 +68,12 @@ jobs:
         run: |
           echo ${{ secrets.GITHUB_TOKEN }} | helm registry login ${{ env.REGISTRY }} -u ${{ github.actor }} --password-stdin
           CHART_NAME=$(basename ${{ github.repository }})
-          helm pull oci://${{ env.REGISTRY }}/${{ env.HELM_CHART_NAME }}/$CHART_NAME --version ">0.0.0" || true
+          helm pull oci://${{ env.REGISTRY }}/${{ env.HELM_CHART_NAME }}/$CHART_NAME || true
           if [ -f ${CHART_NAME}*.tgz ]; then
             CURRENT_VERSION=$(ls ${CHART_NAME}*.tgz | grep -oP '${CHART_NAME}-\K[0-9]+\.[0-9]+\.[0-9]+')
             NEW_VERSION=$(echo $CURRENT_VERSION | awk -F. '{print $1"."$2"."$3+1}')
           else
-            NEW_VERSION="0.1.0"
+            NEW_VERSION="0.0.1"
           fi
           echo "NEW_VERSION=$NEW_VERSION" >> $GITHUB_ENV
           echo "CHART_NAME=$CHART_NAME" >> $GITHUB_ENV
