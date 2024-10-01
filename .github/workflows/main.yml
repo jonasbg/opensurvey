@@ -2,13 +2,14 @@ name: Build and Push Docker image and Helm chart to GHCR
 
 on:
   push:
-    branches: [ "main" ]
+    branches: [ "*" ]
   pull_request:
     branches: [ "main" ]
 
 env:
   REGISTRY: ghcr.io
   IMAGE_NAME: ${{ github.repository }}
+  HELM_CHART_NAME: ${{ github.repository_owner }}/helm-charts
 
 jobs:
   build-and-push:
@@ -19,10 +20,10 @@ jobs:
 
     steps:
       - name: Checkout repository
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
 
       - name: Log in to the Container registry
-        uses: docker/login-action@v2
+        uses: docker/login-action@v3
         with:
           registry: ${{ env.REGISTRY }}
           username: ${{ github.actor }}
@@ -30,18 +31,22 @@ jobs:
 
       - name: Extract metadata (tags, labels) for Docker
         id: meta
-        uses: docker/metadata-action@v4
+        uses: docker/metadata-action@v5
         with:
           images: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}
+          tags: |
+            type=ref,event=branch
+            type=raw,value=latest,enable=${{ github.ref == format('refs/heads/{0}', 'main') }}
+            type=raw,value=dev,enable=${{ github.ref != format('refs/heads/{0}', 'main') }}
 
       - name: Set up QEMU
-        uses: docker/setup-qemu-action@v2
+        uses: docker/setup-qemu-action@v3
 
       - name: Set up Docker Buildx
-        uses: docker/setup-buildx-action@v2
+        uses: docker/setup-buildx-action@v3
 
       - name: Build and push Docker image
-        uses: docker/build-push-action@v4
+        uses: docker/build-push-action@v5
         id: build-and-push
         with:
           context: .
@@ -56,20 +61,28 @@ jobs:
       - name: Set up Helm
         uses: azure/setup-helm@v3
         with:
-          version: v3.12.0
-      - name: Get latest Helm chart version
-        id: get-latest-version
+          version: v3.13.0
+
+      - name: Fetch latest Helm chart version
+        id: fetch-version
         run: |
           echo ${{ secrets.GITHUB_TOKEN }} | helm registry login ${{ env.REGISTRY }} -u ${{ github.actor }} --password-stdin
-          latest_version=$(helm registry list oci://${{ env.REGISTRY }}/${{ github.repository_owner }}/helm-charts 2>/dev/null | grep -oE '[0-9]+\.[0-9]+\.[0-9]+' | sort -V | tail -n 1 || echo "0.0.0")
-          echo "LATEST_VERSION=${latest_version}" >> $GITHUB_ENV
-
-      - name: Increment Helm chart version
-        run: |
-          IFS='.' read -ra ADDR <<< "$LATEST_VERSION"
-          ADDR[2]=$((${ADDR[2]:-0}+1))
-          NEW_VERSION="${ADDR[0]:-0}.${ADDR[1]:-0}.${ADDR[2]}"
+          CHART_NAME=$(basename ${{ github.repository }})
+          helm pull oci://${{ env.REGISTRY }}/${{ env.HELM_CHART_NAME }}/$CHART_NAME --version ">0.0.0" || true
+          if [ -f ${CHART_NAME}*.tgz ]; then
+            CURRENT_VERSION=$(ls ${CHART_NAME}*.tgz | grep -oP '${CHART_NAME}-\K[0-9]+\.[0-9]+\.[0-9]+')
+            NEW_VERSION=$(echo $CURRENT_VERSION | awk -F. '{print $1"."$2"."$3+1}')
+          else
+            NEW_VERSION="0.1.0"
+          fi
           echo "NEW_VERSION=$NEW_VERSION" >> $GITHUB_ENV
+          echo "CHART_NAME=$CHART_NAME" >> $GITHUB_ENV
+          rm -f ${CHART_NAME}*.tgz
+
+      - name: Update Helm Chart.yaml
+        run: |
+          sed -i "s/version: .*/version: ${{ env.NEW_VERSION }}/" .helm/Chart.yaml
+          sed -i "s/appVersion: .*/appVersion: \"${{ steps.meta.outputs.version }}\"/" .helm/Chart.yaml
 
       - name: Update Helm values.yaml
         run: |
@@ -83,6 +96,7 @@ jobs:
           helm package .helm --version ${{ env.NEW_VERSION }} --app-version ${{ steps.meta.outputs.version }}
 
       - name: Push Helm chart to GHCR
+        if: github.ref == 'refs/heads/main'
         run: |
           echo ${{ secrets.GITHUB_TOKEN }} | helm registry login ${{ env.REGISTRY }} -u ${{ github.actor }} --password-stdin
-          helm push *.tgz oci://${{ env.REGISTRY }}/${{ github.repository_owner }}/helm-charts
+          helm push ${{ env.CHART_NAME }}-${{ env.NEW_VERSION }}.tgz oci://${{ env.REGISTRY }}/${{ env.HELM_CHART_NAME }}

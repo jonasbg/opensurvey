@@ -9,3 +9,8 @@ spec:
     port: 80
   selector:
     app: {{ .Release.Name }}-api
+  {{- if .Values.service }}
+  {{- if .Values.service.type }}
+  type: {{ .Values.service.type }}
+  {{- end }}
+  {{- end }}
