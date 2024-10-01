@@ -21,5 +21,11 @@ spec:
                 port:
                   number: 80
             path: /
-            pathType: Prefix
+            pathType: {{ .Values.ingress.pathType | default "Prefix" }}
+  {{- if .Values.ingress.tls.enabled }}
+  tls:
+  - hosts:
+    - {{ .Values.ingress.hostname }}
+    secretName: {{ .Values.ingress.tls.secretName | default "web-tls-secret" }}
+  {{- end }}
 {{- end }}
