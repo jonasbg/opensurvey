@@ -74,8 +74,8 @@ jobs:
             CURRENT_VERSION=$(helm show chart $CHART_NAME-*.tgz | grep '^version:' | awk '{print $2}')
             NEW_VERSION=$(echo $CURRENT_VERSION | awk -F. '{print $1"."$2"."$3+1}')
           else
-            echo "No existing chart found or unable to pull. Starting with version 0.1.0"
-            NEW_VERSION="0.1.0"
+            echo "No existing chart found or unable to pull. Starting with version 0.0.1"
+            NEW_VERSION="0.0.1"
           fi
 
           echo "NEW_VERSION=$NEW_VERSION" >> $GITHUB_ENV
