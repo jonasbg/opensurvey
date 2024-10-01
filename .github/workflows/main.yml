@@ -9,7 +9,6 @@ on:
 env:
   REGISTRY: ghcr.io
   IMAGE_NAME: ${{ github.repository }}
-  HELM_CHART_NAME: ${{ github.repository_owner }}/helm-charts
 
 jobs:
   build-and-push:
@@ -71,7 +70,7 @@ jobs:
 
           echo ${{ secrets.GITHUB_TOKEN }} | helm registry login ${{ env.REGISTRY }} -u ${{ github.actor }} --password-stdin
 
-          if helm pull oci://${{ env.REGISTRY }}/${{ env.HELM_CHARTS_REPO }}/$CHART_NAME --version ">0.0.0" 2>/dev/null; then
+          if helm pull oci://${{ env.REGISTRY }}/${{ github.repository_owner }}/helm-charts/$CHART_NAME --version ">0.0.0" 2>/dev/null; then
             CURRENT_VERSION=$(helm show chart $CHART_NAME-*.tgz | grep '^version:' | awk '{print $2}')
             NEW_VERSION=$(echo $CURRENT_VERSION | awk -F. '{print $1"."$2"."$3+1}')
           else
@@ -102,4 +101,4 @@ jobs:
         if: github.ref == 'refs/heads/main'
         run: |
           echo ${{ secrets.GITHUB_TOKEN }} | helm registry login ${{ env.REGISTRY }} -u ${{ github.actor }} --password-stdin
-          helm push ${{ env.CHART_NAME }}-${{ env.NEW_VERSION }}.tgz oci://${{ env.REGISTRY }}/${{ env.HELM_CHART_NAME }}
+          helm push ${{ env.CHART_NAME }}-${{ env.NEW_VERSION }}.tgz oci://${{ env.REGISTRY }}/${{ github.repository_owner }}/helm-charts
