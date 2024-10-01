@@ -9,6 +9,7 @@ on:
 env:
   REGISTRY: ghcr.io
   IMAGE_NAME: ${{ github.repository }}
+  CACHE_NAME: ${{ github.repository_owner }}/cache
 
 jobs:
   build-and-push:
@@ -53,6 +54,8 @@ jobs:
           push: true
           tags: ${{ steps.meta.outputs.tags }}
           labels: ${{ steps.meta.outputs.labels }}
+          cache-from: type=registry,ref=${{ env.REGISTRY }}/${{ env.CACHE_NAME }}:$(basename ${{ github.repository }})-buildcache
+          cache-to: type=registry,ref=${{ env.REGISTRY }}/${{ env.CACHE_NAME }}:$(basename ${{ github.repository }})-buildcache,mode=max
 
       - name: Extract digest
         run: echo "DIGEST=$(echo '${{ steps.build-and-push.outputs.digest }}' | cut -d':' -f2)" >> $GITHUB_ENV
