@@ -216,7 +216,7 @@ func handleUpload(c echo.Context) error {
 }
 
 func handleToken(c echo.Context) error {
-	token := c.FormValue("token")
+	token := c.FormValue("tokenSearch")
 
 	if token == "" {
 		return c.String(http.StatusBadRequest, "Token is required")

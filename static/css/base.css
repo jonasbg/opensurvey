@@ -30,7 +30,11 @@ html {
 }
 
 body {
+  position: fixed;
+  width: 100%;
   height: 100%;
+  touch-action: manipulation;
+  overflow: hidden;
   font-family: 'Arial', sans-serif;
   background-color: var(--background-color);
   color: var(--text-color);
@@ -40,10 +44,10 @@ body {
   align-items: center;
   padding: 20px;
   padding-bottom: calc(20px + var(--safe-area-inset-bottom));
-  touch-action: none;
+  /* touch-action: none; */
   -ms-touch-action: none;
   position: relative;
-  overflow-y: auto;
+  /* overflow-y: auto; */
   -webkit-overflow-scrolling: touch;
 }
 

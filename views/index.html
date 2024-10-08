@@ -12,7 +12,10 @@
     <h1>Welcome to the Survey App</h1>
     <p>Enter your token to start the survey:</p>
     <form id="survey-form" method="POST" action="/">
-        <input type="text" name="token" id="token" required>
+        <input type="text" name="tokenSearch" id="token" required autoComplete="off"
+        autoCorrect="off"
+        autoCapitalize="off"
+        spellCheck={false}>
         <button type="submit">Start Survey</button>
     </form>
     <script src="/static/js/app.js"></script>
