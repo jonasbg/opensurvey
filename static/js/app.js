@@ -26,6 +26,8 @@
         }
     };
 
+    const emojiCounts = {};
+
     window.sendEmoji = function (emoji) {
         if (socket && socket.readyState === WebSocket.OPEN) {
             const emojiId = createFloatingEmoji(emoji);
@@ -35,6 +37,13 @@
         }
     };
 
+    window.getEmojiCount = function (emoji) {
+        return emojiCounts[emoji] || 0;
+    };
+
+    window.getAllEmojiCounts = function () {
+        return {...emojiCounts};
+    };
 
     function getTokenFromUrl() {
         const pathParts = window.location.pathname.split('/');
@@ -164,6 +173,11 @@
             return null;
         }
 
+        emojiCounts[emoji] = (emojiCounts[emoji] || 0) + 1;
+        if (window.updateAllProgressCircles){
+            window.updateAllProgressCircles();
+        }
+
         const emojiElement = document.createElement('div');
         emojiElement.textContent = emoji;
         emojiElement.setAttribute('data-emoji-id', emojiId);
@@ -268,12 +282,12 @@
     });
 
     let lastTouchEnd = 0;
-document.addEventListener('touchend', function(event) {
-    const now = (new Date()).getTime();
-    if (now - lastTouchEnd <= 300) {
-        event.preventDefault();
-    }
-    lastTouchEnd = now;
-}, false);
+    document.addEventListener('touchend', function(event) {
+        const now = (new Date()).getTime();
+        if (now - lastTouchEnd <= 300) {
+            event.preventDefault();
+        }
+        lastTouchEnd = now;
+    }, false);
 
 })();
