@@ -191,7 +191,7 @@
     let timeout;
     const navbar = document.getElementById('navbar');
     const content = document.getElementById('content');
-    let currentSlide = -1;
+    let currentSlide = {{ .CurrentSlide }};
     window.appState = {
       enableEmojis: true
     }
@@ -332,6 +332,10 @@
 
   window.document.onload = function(e){
     document.getElementById("surveyUrl").textContent = surveyUrl;
+  }
+
+  if (currentSlide >= 0) {
+    loadSlide(currentSlide)
   }
 
   </script>

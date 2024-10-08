@@ -273,8 +273,9 @@ func handlePresenter(c echo.Context) error {
 	}
 
 	return c.Render(http.StatusOK, "presenter.html", map[string]interface{}{
-		"Token":      config.Token,
-		"SurveyName": config.Name,
+		"Token":        config.Token,
+		"SurveyName":   config.Name,
+		"CurrentSlide": currentSlide,
 	})
 }
 
@@ -474,6 +475,7 @@ func handleWebSocket(c echo.Context) error {
 	newCount := atomic.AddInt32(&clientCount, 1)
 	clients.Store(ws, true)
 	broadcast <- Message{Type: "userCount", Payload: newCount}
+
 	defer func() {
 		clients.Delete(ws)
 		ws.Close()
@@ -554,7 +556,7 @@ func resetGlobals() {
 	// close(broadcast)
 	for len(broadcast) > 0 {
 		<-broadcast
-}
+	}
 }
 
 func customErrorHandler(err error, c echo.Context) {
