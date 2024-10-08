@@ -79,6 +79,8 @@ func main() {
 	e.GET("/ws", handleWebSocket)
 	e.GET("/nextSlide", handleNextSlide)
 
+	e.GET("/highscores", handleGetHighScores)
+
 	e.GET("/presenter", handlePresenter)
 	e.GET("/upload", handleUploadPage)
 	e.POST("/upload", handleUpload)
@@ -250,7 +252,7 @@ func handleCompleted(c echo.Context) error {
 	}
 
 	if int(currentSlide) >= len(config.Survey) {
-		return c.Render(http.StatusOK, "completed.html", nil)
+		return c.Render(http.StatusOK, "highscores.html", nil)
 	}
 
 	if currentSlide == 0 {
@@ -486,11 +488,38 @@ func handleWebSocket(c echo.Context) error {
 		if err != nil {
 			break
 		}
-		if msg.Type == "emoji" || msg.Type == "emojiPopped" {
+
+		userID, _ := getUserID(c)
+
+		if msg.Type == "emoji" {
+			updatePlayerScore(userID, "spawn")
+			broadcast <- msg
+		} else if msg.Type == "emojiPopped" {
+			updatePlayerScore(userID, "pop")
 			broadcast <- msg
 		}
 	}
 	return nil
+}
+
+func handleGetHighScores(c echo.Context) error {
+	userID, err := getUserID(c)
+	if err != nil {
+		return c.JSON(http.StatusInternalServerError, map[string]string{"error": "Error retrieving user ID"})
+	}
+
+	highScores := getHighScores(userID)
+
+	// Add ranking to the top scores
+	for i := range highScores.TopScores {
+		highScores.TopScores[i].Rank = i + 1
+	}
+
+	return c.Render(http.StatusOK, "highscores.html", map[string]interface{}{
+		"PlayerScore": highScores.PlayerScore,
+		"TopScores":   highScores.TopScores,
+		"SurveyName":  config.Name,
+	})
 }
 
 func handleNextSlide(c echo.Context) error {
@@ -554,7 +583,7 @@ func resetGlobals() {
 	// close(broadcast)
 	for len(broadcast) > 0 {
 		<-broadcast
-}
+	}
 }
 
 func customErrorHandler(err error, c echo.Context) {

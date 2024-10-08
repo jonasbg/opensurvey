@@ -3,6 +3,7 @@
 @import url("/static/css/userCount.css");
 @import url("/static/css/emojis.css");
 @import url("/static/css/barChart.css");
+
 /* Reset and base styles */
 * {
   margin: 0;
@@ -40,8 +41,8 @@ body {
   align-items: center;
   padding: 20px;
   padding-bottom: calc(20px + var(--safe-area-inset-bottom));
-  touch-action: none;
-  -ms-touch-action: none;
+  /* touch-action: none; */
+  /* -ms-touch-action: none; */
   position: relative;
   overflow-y: auto;
   -webkit-overflow-scrolling: touch;

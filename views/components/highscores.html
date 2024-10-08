@@ -1,0 +1,113 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Highscores</title>
+    <link rel="stylesheet" href="/static/css/base.css">
+    <style>
+        .highscores-container {
+            background-color: white;
+            border-radius: 8px;
+            padding: 20px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            max-width: 400px;
+            width: 100%;
+            margin: 20px auto;
+        }
+        .highscore-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 10px 0;
+            border-bottom: 1px solid #e0e0e0;
+        }
+        .highscore-item:last-child {
+            border-bottom: none;
+        }
+        .your-score {
+            background-color: #e8f5e9;
+            font-weight: bold;
+        }
+        .popup {
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background-color: white;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
+            z-index: 1000;
+            display: none;
+        }
+        .popup-content {
+            text-align: center;
+        }
+        .close-popup {
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            font-size: 20px;
+            cursor: pointer;
+        }
+    </style>
+</head>
+<body>
+    <h1>Highscores</h1>
+    <div class="highscores-container">
+        <h2>Your Score</h2>
+        <div class="highscore-item your-score">
+            <span>You</span>
+            <span>{{.PlayerScore.PoppedCount}} 💥</span>
+        </div>
+        <h2>Top 10 Players</h2>
+        {{range $score := .TopScores}}
+            <div class="highscore-item {{if eq $score.UserID $.PlayerScore.UserID}}your-score{{end}}">
+                <span>{{if eq $score.UserID $.PlayerScore.UserID}}👉 YOU{{else}}{{$score.Rank}}{{end}}</span>
+                <span>{{$score.Score}} 💥</span>
+            </div>
+        {{end}}
+    </div>
+    <div id="emoji-buttons">
+        <button class="emoji-btn" data-emoji="👍">👍</button>
+        <button class="emoji-btn" data-emoji="👏">👏</button>
+        <button class="emoji-btn" data-emoji="💯">💯</button>
+        <button class="emoji-btn" data-emoji="💩">💩</button>
+        <button class="emoji-btn" data-emoji="👎">👎</button>
+    </div>
+    <div class="popup" id="scorePopup">
+        <div class="close-popup" onclick="closePopup()">&times;</div>
+        <div class="popup-content">
+            <h2>Your Score</h2>
+            <p>Emojis Spawned: {{.PlayerScore.SpawnedCount}}</p>
+            <p>Emojis Popped: {{.PlayerScore.PoppedCount}}</p>
+        </div>
+    </div>
+    <script src="/static/js/app.js"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            window.appState.enableEmojis = true;
+
+            // Add click event listeners to emoji buttons
+            document.querySelectorAll('.emoji-btn').forEach(button => {
+                button.addEventListener('click', function() {
+                    const emoji = this.getAttribute('data-emoji');
+                    window.sendEmoji(emoji);
+                });
+            });
+
+            // Show popup when the page loads
+            showPopup();
+        });
+
+        function showPopup() {
+            document.getElementById('scorePopup').style.display = 'block';
+        }
+
+        function closePopup() {
+            document.getElementById('scorePopup').style.display = 'none';
+        }
+    </script>
+</body>
+</html>
