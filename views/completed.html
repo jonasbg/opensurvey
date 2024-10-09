@@ -190,8 +190,10 @@
         function updateProgressCircle(svg, percentage) {
             svg.style.setProperty('--progress', percentage);
         }
-
-        windows.updateAllProgressCircles = updateAllProgressCircles
+        
+        window.addEventListener('load', function() {
+          window.updateAllProgressCircles = updateAllProgressCircles;
+        });
     </script>
 </body>
 </html>
