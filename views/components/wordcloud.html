@@ -1,107 +1,207 @@
 {{define "wordcloud"}}
-<link rel="stylesheet" href="/static/css/wordcloud.css">
+<style>
+  #wordCloud {
+      width: 100vw;
+      height: 100vh;
+      position: relative;
+      overflow: hidden;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+  }
+  .word {
+      position: absolute;
+      cursor: pointer;
+      transition: all 0.5s ease;
+      text-align: center;
+      opacity: 0;
+  }
+  .word.visible {
+      opacity: 1;
+  }
+  .word:hover {
+      transform: scale(1.1);
+  }
+</style>
 
-<ul id="wordcloud" class="cloud" role="navigation" aria-label="Word cloud">
-    {{range .Results}}
-    <li>
-        <a href="#" data-weight="{{.Count}}" data-word="{{.Answer}}">{{.Answer}}</a>
-    </li>
-    {{end}}
-</ul>
+<div id="wordCloud"></div>
 
 <script>
-function randomInt(min, max) {
-    return Math.floor(Math.random() * (max - min + 1)) + min;
-  }
+let words = [];
+let wordElements = {};
 
-  document.addEventListener('DOMContentLoaded', () => {
-    const words = document.querySelectorAll('#wordcloud li');
-    words.forEach(word => {
-      const hue = randomInt(0, 360);
-      word.style.setProperty('--hue', hue);
-    });
+function processResults(results) {
+  const wordCounts = {};
+  Object.entries(results).forEach(([answer, count]) => {
+      const words = answer.toLowerCase().split(/[\s,;.!?()[\]{}'"]+/);
+      words.forEach(word => {
+          if (word.length > 0) {
+              wordCounts[word] = (wordCounts[word] || 0) + count;
+          }
+      });
+  });
+  return Object.entries(wordCounts).map(([text, size]) => ({ text, size }));
+}
+
+function updateWordCloud(newResults) {
+  const newWords = processResults(newResults);
+  const container = document.getElementById('wordCloud');
+  const containerRect = container.getBoundingClientRect();
+  const centerX = containerRect.width / 2;
+  const centerY = containerRect.height / 2;
+
+  // Update existing words and identify new ones
+  const updatedWords = new Set();
+  newWords.forEach(newWord => {
+      if (wordElements[newWord.text]) {
+          // Update existing word
+          const element = wordElements[newWord.text];
+          element.style.fontSize = `${Math.min(Math.max(newWord.size, 30), 50)}px`;
+          updatedWords.add(newWord.text);
+      } else {
+          // Add new word
+          addWordToCloud(newWord, container, containerRect, centerX, centerY);
+          updatedWords.add(newWord.text);
+      }
   });
 
-    function updateWordCloud() {
-        const wordcloud = document.getElementById('wordcloud');
-        if (!wordcloud) return;
+  // Remove words that are no longer present
+  Object.keys(wordElements).forEach(word => {
+      if (!updatedWords.has(word)) {
+          wordElements[word].remove();
+          delete wordElements[word];
+      }
+  });
 
-        const wordCloudData = window.appState.wordCloudData;
-        const maxWeight = Math.max(...Object.values(wordCloudData));
-        const currentWords = new Set(Array.from(wordcloud.querySelectorAll('li a')).map(a => a.getAttribute('data-word')));
+  words = newWords;
+}
 
-        for (const [word, weight] of Object.entries(wordCloudData)) {
-            const normalizedWeight = Math.log(weight + 1) / Math.log(maxWeight + 1);
-            const fontSize = 14 + normalizedWeight * 32;
+function addWordToCloud(word, container, containerRect, centerX, centerY) {
+  const wordElement = document.createElement('div');
+  wordElement.className = 'word';
+  wordElement.textContent = word.text;
+  wordElement.style.fontSize = `${Math.min(Math.max(word.size, 30), 50)}px`;
+  wordElement.style.color = getRandomColor();
 
-            let li = wordcloud.querySelector(`li a[data-word="${word}"]`);
-            if (li) {
-                // Word exists, update weight if changed
-                const currentWeight = parseFloat(li.getAttribute('data-weight'));
-                if (weight !== currentWeight) {
-                    li.setAttribute('data-weight', weight);
-                    li.style.fontSize = `${fontSize}px`;
-                    li.parentNode.style.animation = 'updatePulse 1s ease-in-out';
-                    li.parentNode.addEventListener('animationend', () => {
-                        li.parentNode.style.animation = '';
-                    }, { once: true });
-                }
-            } else {
-                // Word doesn't exist, add it
-                li = document.createElement('a');
-                li.href = '#';
-                li.textContent = word;
-                li.setAttribute('data-word', word);
-                li.setAttribute('data-weight', weight);
-                li.style.fontSize = `${fontSize}px`;
-
-                const newLi = document.createElement('li');
-                newLi.appendChild(li);
-                newLi.style.animation = 'fadeInScale 1s ease-out-out';
-                wordcloud.appendChild(newLi);
-
-                newLi.addEventListener('animationend', () => {
-                    newLi.style.animation = '';
-                }, { once: true });
-            }
-        }
-    }
-
-  function calculateWordCloudData(results) {
-    const wordCloudData = {};
-    Object.entries(results).forEach(([answer, count]) => {
-        // Split by space, comma, and other common delimiters
-        const words = answer.toLowerCase().split(/[\s,;.!?()[\]{}'"]+/);
-        words.forEach(word => {
-            if (word.length > 0) {
-                wordCloudData[word] = (wordCloudData[word] || 0) + count;
-            }
-        });
-    });
-    return wordCloudData;
+  const isVertical = Math.random() > 0.5;
+  if (isVertical) {
+      wordElement.style.writingMode = 'vertical-rl';
   }
 
-    addEventListener("DOMContentLoaded", (event) => {
-        window.appState.subscribe((key, value) => {
-            if (key === 'results') {
-                window.appState.wordCloudData = calculateWordCloudData(value);
-                updateWordCloud();
-            }
-        });
+  container.appendChild(wordElement);
+  const rect = wordElement.getBoundingClientRect();
 
-        const resultsList = document.getElementById('results-list');
-        if (resultsList) {
-            const initialResults = {};
-            const listItems = resultsList.querySelectorAll('li');
-            listItems.forEach(li => {
-                const answer = li.getAttribute('data-answer');
-                const count = parseInt(li.querySelector('.count').textContent);
-                initialResults[answer] = count;
-            });
+  const position = findPosition(rect, containerRect, centerX, centerY);
+  if (position) {
+      wordElement.style.left = `${position.x}px`;
+      wordElement.style.top = `${position.y}px`;
+      wordElements[word.text] = wordElement;
+      setTimeout(() => {
+          wordElement.classList.add('visible');
+      }, 50);
+  } else {
+      wordElement.remove();
+  }
+}
 
-            window.appState.wordCloudData = calculateWordCloudData(initialResults);
-            updateWordCloud();
-        }
-    });
+function findPosition(rect, containerRect, centerX, centerY) {
+  const spiralStep = 0.1;
+  let angle = 0;
+  let radius = 0;
+  const maxRadius = Math.min(containerRect.width, containerRect.height) / 2;
+
+  while (radius < maxRadius) {
+      const x = centerX + radius * Math.cos(angle) - rect.width / 2;
+      const y = centerY + radius * Math.sin(angle) - rect.height / 2;
+
+      if (x >= 0 && y >= 0 && x + rect.width <= containerRect.width && y + rect.height <= containerRect.height) {
+          if (!checkCollision(x, y, rect.width, rect.height, Object.values(wordElements))) {
+              return { x, y };
+          }
+      }
+
+      angle += spiralStep;
+      radius += spiralStep / (2 * Math.PI);
+  }
+
+  return null;
+}
+
+function checkCollision(x, y, width, height, placedWords) {
+  for (const word of placedWords) {
+      const rect = word.getBoundingClientRect();
+      if (
+          x < rect.left + rect.width &&
+          x + width > rect.left &&
+          y < rect.top + rect.height &&
+          y + height > rect.top
+      ) {
+          return true;
+      }
+  }
+  return false;
+}
+
+function getRandomColor() {
+  const letters = '0123456789ABCDEF';
+  let color = '#';
+  for (let i = 0; i < 6; i++) {
+      color += letters[Math.floor(Math.random() * 16)];
+  }
+  return color;
+}
+
+function createInitialWordCloud() {
+  const container = document.getElementById('wordCloud');
+  container.innerHTML = ''; // Clear existing words
+  wordElements = {};
+  const containerRect = container.getBoundingClientRect();
+  const centerX = containerRect.width / 2;
+  const centerY = containerRect.height / 2;
+
+  words.sort((a, b) => b.size - a.size);
+
+  words.forEach((word, index) => {
+      addWordToCloud(word, container, containerRect, centerX, centerY);
+  });
+}
+
+// Initialize word cloud with data from Go template
+words = processResults({
+  {{range .Results}}
+  "{{.Answer}}": {{.Count}},
+  {{end}}
+});
+
+document.addEventListener('DOMContentLoaded', createInitialWordCloud);
+
+document.addEventListener('DOMContentLoaded', () => {
+  if (window.appState && window.appState.subscribe) {
+      window.appState.subscribe((key, value) => {
+          if (key === 'results') {
+              console.log(value);
+              updateWordCloud(value);
+          }
+      });
+  }
+});
+
+// Resize handler
+window.addEventListener('resize', debounce(() => {
+  createInitialWordCloud();
+}, 250));
+
+// Debounce function
+function debounce(func, wait) {
+  let timeout;
+  return function executedFunction(...args) {
+      const later = () => {
+          clearTimeout(timeout);
+          func(...args);
+      };
+      clearTimeout(timeout);
+      timeout = setTimeout(later, wait);
+  };
+}
 </script>
 {{end}}

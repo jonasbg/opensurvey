@@ -34,9 +34,9 @@
 #wordcloud a[data-weight="4"] { --size: 4; --lightness: 65%; }
 #wordcloud a[data-weight="5"] { --size: 6; --lightness: 60%; }
 #wordcloud a[data-weight="6"] { --size: 8; --lightness: 55%; }
-#wordcloud a[data-weight="7"] { --size: 10; --lightness: 50%; }
-#wordcloud a[data-weight="8"] { --size: 13; --lightness: 45%; }
-#wordcloud a[data-weight="9"] { --size: 16; --lightness: 40%; }
+#wordcloud a[data-weight="7"] { --size: 25; --lightness: 50%; }
+#wordcloud a[data-weight="8"] { --size: 32; --lightness: 45%; }
+#wordcloud a[data-weight="9"] { --size: 54; --lightness: 40%; }
 
 #wordcloud a:hover {
   transform: scale(1.1);
