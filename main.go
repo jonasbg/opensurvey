@@ -371,6 +371,18 @@ func handleSubmit(c echo.Context) error {
 		selectedAnswers = []string{answer}
 	}
 
+		answerFound := slide.ResultType == "wordcloud"
+		for _, a := range slide.Answers {
+			for _, answer := range selectedAnswers {
+				if answer == a {
+					answerFound = true
+				}
+			}
+		}
+		if !answerFound {
+			return c.String(http.StatusBadRequest, "Invalid answer submitted")
+		}
+
 	storeAnswers(token, int(currentSlide), userID, selectedAnswers)
 
 	results := getResults(token)
