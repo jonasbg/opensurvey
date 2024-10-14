@@ -489,6 +489,12 @@ func handleWebSocket(c echo.Context) error {
 		return err
 	}
 	newCount := atomic.AddInt32(&clientCount, 1)
+	// Send the current slide number to the newly connected client
+	err = ws.WriteJSON(Message{Type: "currentSlide", Payload: currentSlide})
+	if err != nil {
+		log.Printf("Error sending current slide: %v", err)
+	}
+
 	clients.Store(ws, true)
 	broadcast <- Message{Type: "userCount", Payload: newCount}
 

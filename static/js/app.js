@@ -1,6 +1,8 @@
 (function () {
     let socket;
     const token = getTokenFromUrl();
+    let currentSlideNumber = localStorage.getItem("currentSlide") || -1;
+
 
     // Global state object
     window.appState = {
@@ -57,14 +59,18 @@
         socket.onmessage = function (event) {
             const message = JSON.parse(event.data);
             if (message.type === "newSlide") {
-                if (window.location.pathname.indexOf("results") > 0) {
-                    // Redirect to the survey
-                    window.location.href = `/survey/${token}`;
-                } else {
-                    // Reload the survey page
-                    window.location.reload();
+                localStorage.setItem("currentSlide", message.payload);
+                currentSlideNumber = message.payload;
+                redirectToCorrectSlide()
+            } else if (message.type === "currentSlide") {
+                if (currentSlideNumber != message.payload && window.self === window.top) {
+                    localStorage.setItem("currentSlide", message.payload);
+                    currentSlideNumber = message.payload;
+                    // Redirect to the correct slide if necessary
+                    redirectToCorrectSlide();
                 }
-            } else if (message.type === "newAnswer") {
+            }
+            else if (message.type === "newAnswer") {
                 // Update the results in the appState
                 window.appState.setState('results', message.payload);
             } else if (message.type === "userCount") {
@@ -91,6 +97,16 @@
             console.log("WebSocket connection closed. Reconnecting...");
             setTimeout(connectWebSocket, 1000);
         };
+    }
+
+    function redirectToCorrectSlide() {
+        if (window.location.pathname.indexOf("results") > 0) {
+            // Redirect to the survey
+            window.location.href = `/survey/${token}`;
+        } else {
+            // Reload the survey page
+            window.location.reload();
+        }
     }
 
     connectWebSocket();
@@ -276,6 +292,18 @@
             window.history.replaceState(null, '', '/survey/' + token);
         }
     }
+
+    function requestCurrentSlide() {
+        if (socket && socket.readyState === WebSocket.OPEN) {
+            socket.send(JSON.stringify({ type: "requestCurrentSlide" }));
+        }
+    }
+
+    document.addEventListener("visibilitychange", function() {
+        if (!document.hidden) {
+            requestCurrentSlide()
+        }
+    });
 
     document.addEventListener('DOMContentLoaded', function () {
         rewriteURL(token);
