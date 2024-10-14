@@ -1,14 +1,17 @@
 package main
 
 import (
+	"bytes"
 	"crypto/rand"
 	"encoding/base64"
+	"encoding/csv"
 	"fmt"
 	"html/template"
 	"io"
 	"log"
 	"net/http"
 	"os"
+	"strconv"
 	"strings"
 	"sync"
 	"sync/atomic"
@@ -80,6 +83,7 @@ func main() {
 	e.GET("/nextSlide", handleNextSlide)
 
 	e.GET("/presenter", handlePresenter)
+	e.GET("/presenter/export", handleExport)
 	e.GET("/upload", handleUploadPage)
 	e.POST("/upload", handleUpload)
 
@@ -589,4 +593,52 @@ func customErrorHandler(err error, c echo.Context) {
 	if code != http.StatusOK {
 		c.Redirect(http.StatusFound, "/")
 	}
+}
+
+func handleExport(c echo.Context) error {
+	// Check authentication
+	cookie, err := c.Cookie(userIDCookieName)
+	if err != nil || cookie.Value != config.Secret {
+		return c.String(http.StatusUnauthorized, "Unauthorized")
+	}
+
+	// Create a buffer to store our CSV data
+	buf := &bytes.Buffer{}
+	w := csv.NewWriter(buf)
+
+	// Write the header
+	w.Write([]string{"Slide", "Answer", "Count"})
+
+	// Iterate through all slides and write their data
+	for i, _ := range config.Survey {
+		key := fmt.Sprintf("%s:%d", config.Token, i)
+		answers := getAnswers(key)
+
+		// Count the answers
+		answerCounts := make(map[string]int)
+		for _, answer := range answers {
+			answerCounts[answer]++
+		}
+
+		// Write the data for each answer
+		for answer, count := range answerCounts {
+			w.Write([]string{
+				strconv.Itoa(i + 1),
+				answer,
+				strconv.Itoa(count),
+			})
+		}
+	}
+
+	w.Flush()
+
+	if err := w.Error(); err != nil {
+		return c.String(http.StatusInternalServerError, "Error generating CSV")
+	}
+
+	// Set headers for file download
+	c.Response().Header().Set("Content-Disposition", "attachment; filename=survey_results.csv")
+	c.Response().Header().Set("Content-Type", "text/csv")
+
+	return c.Blob(http.StatusOK, "text/csv", buf.Bytes())
 }
