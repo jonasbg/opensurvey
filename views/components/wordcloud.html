@@ -131,28 +131,35 @@ function findPosition(rect, containerRect, centerX, centerY) {
 }
 
 function checkCollision(x, y, width, height, placedWords) {
+  const buffer = 5; // Add a 5px buffer around each word
   for (const word of placedWords) {
-      const rect = word.getBoundingClientRect();
-      if (
-          x < rect.left + rect.width &&
-          x + width > rect.left &&
-          y < rect.top + rect.height &&
-          y + height > rect.top
-      ) {
-          return true;
-      }
+    const rect = word.getBoundingClientRect();
+    if (
+      x - buffer < rect.left + rect.width &&
+      x + width + buffer > rect.left &&
+      y - buffer < rect.top + rect.height &&
+      y + height + buffer > rect.top
+    ) {
+      return true;
+    }
   }
   return false;
 }
 
+
 function getRandomColor() {
-  const letters = '0123456789ABCDEF';
-  let color = '#';
-  for (let i = 0; i < 6; i++) {
-      color += letters[Math.floor(Math.random() * 16)];
-  }
-  return color;
+  // Generate a random hue
+  const hue = Math.floor(Math.random() * 360);
+
+  // Use high saturation for vivid colors
+  const saturation = 70 + Math.random() * 30; // 70-100%
+
+  // Use low lightness for dark colors
+  const lightness = 15 + Math.random() * 20; // 15-35%
+
+  return `hsl(${hue}, ${saturation}%, ${lightness}%)`;
 }
+
 
 function createInitialWordCloud() {
   const container = document.getElementById('wordCloud');
