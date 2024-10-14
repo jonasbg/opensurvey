@@ -38,11 +38,6 @@
 #wordcloud a[data-weight="8"] { --size: 13; --lightness: 45%; }
 #wordcloud a[data-weight="9"] { --size: 16; --lightness: 40%; }
 
-#wordcloud li:nth-child(5n+1) { transform: rotate(-5deg); }
-#wordcloud li:nth-child(5n+2) { transform: rotate(5deg); }
-#wordcloud li:nth-child(5n+3) { transform: rotate(-3deg); }
-#wordcloud li:nth-child(5n+4) { transform: rotate(3deg); }
-
 #wordcloud a:hover {
   transform: scale(1.1);
 }

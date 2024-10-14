@@ -19,12 +19,6 @@ function randomInt(min, max) {
     words.forEach(word => {
       const hue = randomInt(0, 360);
       word.style.setProperty('--hue', hue);
-
-      // Randomly rotate some words
-      if (Math.random() < 0.6) {  // 60% chance of rotation
-        const rotation = randomInt(-10, 10);
-        word.style.transform = `rotate(${rotation}deg)`;
-      }
     });
   });
 
@@ -73,18 +67,19 @@ function randomInt(min, max) {
         }
     }
 
-    function calculateWordCloudData(results) {
-        const wordCloudData = {};
-        Object.entries(results).forEach(([answer, count]) => {
-            const words = answer.toLowerCase().split(/\s+/);
-            words.forEach(word => {
-                if (word.length > 0) {
-                    wordCloudData[word] = (wordCloudData[word] || 0) + count;
-                }
-            });
+  function calculateWordCloudData(results) {
+    const wordCloudData = {};
+    Object.entries(results).forEach(([answer, count]) => {
+        // Split by space, comma, and other common delimiters
+        const words = answer.toLowerCase().split(/[\s,;.!?()[\]{}'"]+/);
+        words.forEach(word => {
+            if (word.length > 0) {
+                wordCloudData[word] = (wordCloudData[word] || 0) + count;
+            }
         });
-        return wordCloudData;
-    }
+    });
+    return wordCloudData;
+  }
 
     addEventListener("DOMContentLoaded", (event) => {
         window.appState.subscribe((key, value) => {
