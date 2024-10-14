@@ -33,10 +33,10 @@ let wordElements = {};
 function processResults(results) {
   const wordCounts = {};
   Object.entries(results).forEach(([answer, count]) => {
-      const words = answer.toLowerCase().split(/[\s,;.!?()[\]{}'"]+/);
+      const words = answer.toLowerCase().split(/[,;.!?()[\]{}'"]+/);
       words.forEach(word => {
           if (word.length > 0) {
-              wordCounts[word] = (wordCounts[word] || 0) + 1; // Count occurrences, not server count
+              wordCounts[word] = (wordCounts[word] || 0) + count; // Count occurrences, not server count
           }
       });
   });
@@ -160,6 +160,15 @@ function getRandomColor() {
   return `hsl(${hue}, ${saturation}%, ${lightness}%)`;
 }
 
+// function getRandomColor() {
+//   const letters = '0123456789ABCDEF';
+//   let color = '#';
+//   for (let i = 0; i < 6; i++) {
+//       color += letters[Math.floor(Math.random() * 16)];
+//   }
+//   return color;
+// }
+
 
 function createInitialWordCloud() {
   const container = document.getElementById('wordCloud');
@@ -189,7 +198,6 @@ document.addEventListener('DOMContentLoaded', () => {
   if (window.appState && window.appState.subscribe) {
       window.appState.subscribe((key, value) => {
           if (key === 'results') {
-              console.log(value);
               updateWordCloud(value);
           }
       });

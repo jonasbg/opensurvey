@@ -50,13 +50,12 @@ func submitWords(token string, words string) error {
 	}
 	defer resp.Body.Close()
 
-	body, err := ioutil.ReadAll(resp.Body)
+	_, err = ioutil.ReadAll(resp.Body)
 	if err != nil {
 		return err
 	}
 
 	fmt.Printf("Response status: %s\n", resp.Status)
-	fmt.Printf("Response body: %s\n", string(body))
 
 	return nil
 }
@@ -65,7 +64,9 @@ func main() {
 	token := "token" // Replace with the actual token
 	wordCount := 3   // Number of words to generate and submit
 
-	for i := 0; i < 25; i++ { // Submit 5 times
+	for i := 0; i < 2500000000; i++ { // Submit 5 times
+		wordCount = rand.Intn(2) + 1
+		wordCount = 1
 		words := generateWords(wordCount)
 		fmt.Printf("Submitting words: %s\n", words)
 
