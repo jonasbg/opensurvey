@@ -36,11 +36,16 @@ function processResults(results) {
       const words = answer.toLowerCase().split(/[\s,;.!?()[\]{}'"]+/);
       words.forEach(word => {
           if (word.length > 0) {
-              wordCounts[word] = (wordCounts[word] || 0) + count;
+              wordCounts[word] = (wordCounts[word] || 0) + 1; // Count occurrences, not server count
           }
       });
   });
-  return Object.entries(wordCounts).map(([text, size]) => ({ text, size }));
+  const maxCount = Math.max(...Object.values(wordCounts));
+  return Object.entries(wordCounts).map(([text, count]) => ({
+      text,
+      size: 30 + (count / maxCount) * 20, // Scale size between 30 and 50
+      weight: Math.floor(100 + (count / maxCount) * 800) // Scale weight between 100 and 900
+  }));
 }
 
 function updateWordCloud(newResults) {
@@ -50,22 +55,19 @@ function updateWordCloud(newResults) {
   const centerX = containerRect.width / 2;
   const centerY = containerRect.height / 2;
 
-  // Update existing words and identify new ones
   const updatedWords = new Set();
   newWords.forEach(newWord => {
       if (wordElements[newWord.text]) {
-          // Update existing word
           const element = wordElements[newWord.text];
-          element.style.fontSize = `${Math.min(Math.max(newWord.size, 30), 50)}px`;
+          element.style.fontSize = `${newWord.size}px`;
+          element.style.fontWeight = newWord.weight;
           updatedWords.add(newWord.text);
       } else {
-          // Add new word
           addWordToCloud(newWord, container, containerRect, centerX, centerY);
           updatedWords.add(newWord.text);
       }
   });
 
-  // Remove words that are no longer present
   Object.keys(wordElements).forEach(word => {
       if (!updatedWords.has(word)) {
           wordElements[word].remove();
@@ -80,7 +82,8 @@ function addWordToCloud(word, container, containerRect, centerX, centerY) {
   const wordElement = document.createElement('div');
   wordElement.className = 'word';
   wordElement.textContent = word.text;
-  wordElement.style.fontSize = `${Math.min(Math.max(word.size, 30), 50)}px`;
+  wordElement.style.fontSize = `${word.size}px`;
+  wordElement.style.fontWeight = word.weight;
   wordElement.style.color = getRandomColor();
 
   const isVertical = Math.random() > 0.5;
@@ -153,7 +156,7 @@ function getRandomColor() {
 
 function createInitialWordCloud() {
   const container = document.getElementById('wordCloud');
-  container.innerHTML = ''; // Clear existing words
+  container.innerHTML = '';
   wordElements = {};
   const containerRect = container.getBoundingClientRect();
   const centerX = containerRect.width / 2;
@@ -186,12 +189,10 @@ document.addEventListener('DOMContentLoaded', () => {
   }
 });
 
-// Resize handler
 window.addEventListener('resize', debounce(() => {
   createInitialWordCloud();
 }, 250));
 
-// Debounce function
 function debounce(func, wait) {
   let timeout;
   return function executedFunction(...args) {
